@@ -7,3 +7,9 @@ __pycache__/
 
 # macOS
 .DS_Store
+
+# Sample workbooks (contain patient data)
+sample_data/*.xlsx
+sample_data/*.xls
+# Except documentation
+!sample_data/README.md

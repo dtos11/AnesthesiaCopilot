@@ -29,3 +29,19 @@ class WorkbookReader:
         print("Worksheets:")
         for sheet in self.sheet_names:
             print(f"  • {sheet}")
+
+    def print_headers(self):
+        """Print the header row of every worksheet."""
+
+        for sheet_name in self.sheet_names:
+            sheet = self.workbook[sheet_name]
+
+            print(f"\n=== {sheet_name} ===")
+
+            headers = []
+
+            for cell in sheet[1]:
+                if cell.value:
+                    headers.append(str(cell.value))
+
+            print(headers)

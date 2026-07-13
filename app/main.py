@@ -19,17 +19,25 @@ def main():
 
     print(f"\nFound {len(cases)} scheduled procedures\n")
 
-    validator = MissingAnesthesiologistValidator()
+    missing_validator = MissingAnesthesiologistValidator()
 
-    errors = validator.validate(cases)
+    missing_result = missing_validator.validate(cases)
 
-    print(f"\nMissing anesthesiologist: {len(errors)}\n")
+    print(f"\n{missing_result.name}: {missing_result.issue_count}\n")
 
-    for case in errors:
+    for case in missing_result.issues:
         print(case)
 
-    double_booking = DoubleBookingValidator()
-    double_booking.validate(cases)
+    double_booking_validator = DoubleBookingValidator()
+
+    double_booking_result = double_booking_validator.validate(cases)
+
+    print(f"\n{double_booking_result.name}: {double_booking_result.issue_count}\n")
+
+    for current, next_case in double_booking_result.issues:
+        print(f"\nDOUBLE BOOKING: {current.anesthesiologist}")
+        print(current)
+        print(next_case)
 
 
 if __name__ == "__main__":

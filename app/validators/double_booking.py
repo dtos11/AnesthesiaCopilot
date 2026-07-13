@@ -1,4 +1,5 @@
 from validators.validator import Validator
+from models.validation_result import ValidationResult
 
 
 class DoubleBookingValidator(Validator):
@@ -31,12 +32,11 @@ class DoubleBookingValidator(Validator):
                 if current.end_time() > next_case.scheduled_time:
 
                     if current.is_same_procedure(next_case):
-                        continue
-
-                    print(f"\nDOUBLE BOOKING: {anesthesiologist}")
-                    print(current)
-                    print(next_case)
+                        continue                    
 
                     errors.append((current, next_case))
 
-        return errors
+        return ValidationResult(
+            name="Double bookings",
+            issues=errors,
+)

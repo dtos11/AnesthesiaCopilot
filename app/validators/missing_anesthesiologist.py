@@ -1,4 +1,5 @@
 from validators.validator import Validator
+from models.validation_result import ValidationResult
 
 
 class MissingAnesthesiologistValidator(Validator):
@@ -15,4 +16,7 @@ class MissingAnesthesiologistValidator(Validator):
             ):
                 errors.append(case)
 
-        return errors
+        return ValidationResult(
+            name="Missing anesthesiologist",
+            issues=errors,
+)

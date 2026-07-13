@@ -2,6 +2,7 @@ from workbook_reader import WorkbookReader
 from case_builder import CaseBuilder
 from validators.missing_anesthesiologist import MissingAnesthesiologistValidator
 from validators.double_booking import DoubleBookingValidator
+from availability_reader import AvailabilityReader
 
 def main():
     print("=== AnesthesiaCopilot ===\n")
@@ -10,10 +11,11 @@ def main():
     reader.read()
 
     builder = CaseBuilder(reader.workbook)
+    cases = builder.build()   
 
-    cases = builder.build()
-    print(cases[0])
-    print(cases[0].end_time())
+    availability_reader = AvailabilityReader(reader.workbook)
+    availability_reader.read()
+
 
     print(f"\nFound {len(cases)} scheduled procedures\n")
 

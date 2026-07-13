@@ -30,6 +30,9 @@ class DoubleBookingValidator(Validator):
 
                 if current.end_time() > next_case.scheduled_time:
 
+                    if current.is_same_procedure(next_case):
+                        continue
+
                     print(f"\nDOUBLE BOOKING: {anesthesiologist}")
                     print(current)
                     print(next_case)

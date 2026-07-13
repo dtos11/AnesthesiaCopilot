@@ -31,3 +31,11 @@ class Case:
         start = datetime.combine(datetime.today(), self.scheduled_time)
         end = start + timedelta(minutes=self.duration_minutes)
         return end.time()
+    
+    def is_same_procedure(self, other):
+
+        return (
+        self.patient == other.patient
+        and self.operating_room == other.operating_room
+        and self.scheduled_time == other.scheduled_time
+    )

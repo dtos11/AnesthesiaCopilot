@@ -1,8 +1,7 @@
 from datetime import datetime, UTC
 
-now = datetime.now(UTC).isoformat()
-
-from google_calendar_client import GoogleCalendarClient
+from app.calendar.google_calendar_client import GoogleCalendarClient
+from app.models.vacation import Vacation
 
 
 VACATIONS_CALENDAR_ID = (
@@ -17,7 +16,7 @@ class VacationsReader:
 
     def read(self):
 
-        now = datetime.utcnow().isoformat() + "Z"
+        now = datetime.now(UTC).isoformat()
 
         events = (
             self.client.service.events()
@@ -30,7 +29,36 @@ class VacationsReader:
             .execute()
         )
 
-        return events["items"]
+        vacations = []
+
+        for event in events["items"]:
+
+            summary = event["summary"].strip()
+
+            replacement = None
+
+            if " cubre " in summary:
+                person, replacement = summary.split(" cubre ", 1)
+
+            elif " pendiente reemplazo" in summary:
+                person = summary.replace(" pendiente reemplazo", "")
+
+            elif " falta reemplazo" in summary:
+                person = summary.replace(" falta reemplazo", "")
+
+            else:
+                person = summary
+
+            vacations.append(
+                Vacation(
+                    person=person.strip(),
+                    start=event["start"]["date"],
+                    end=event["end"]["date"],
+                    replacement=replacement.strip() if replacement else None,
+                )
+            )
+
+        return vacations
 
 
 def main():
@@ -42,7 +70,7 @@ def main():
     print("\n=== Upcoming vacations ===\n")
 
     for vacation in vacations:
-        print(vacation["summary"])
+        print(vacation)
 
 
 if __name__ == "__main__":

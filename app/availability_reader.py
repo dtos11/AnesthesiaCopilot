@@ -1,9 +1,7 @@
-class AvailabilityReader:
+class AvailabilityReader:    
 
-    
-
-        def __init__(self, workbook):
+    def __init__(self, workbook):
             self.workbook = workbook
 
-        def read(self):
+    def read(self):
             pass

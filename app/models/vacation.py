@@ -9,18 +9,28 @@ class Vacation:
         start: date,
         end: date,
         replacement: str | None = None,
+        needs_replacement: bool = False,
     ):
         self.person = person
         self.start = start
         self.end = end
         self.replacement = replacement
+        self.needs_replacement = needs_replacement
 
     def __str__(self):
-        if self.replacement:
-            return (
-                f"{self.person} "
-                f"({self.start} - {self.end}) "
-                f"-> {self.replacement}"
-            )
 
-        return f"{self.person} ({self.start} - {self.end})"
+        text = f"{self.person} ({self.start} - {self.end})"
+
+        if self.replacement:
+            text += f" -> {self.replacement}"
+
+        if self.needs_replacement:
+            text += " [needs replacement]"
+
+        return text
+
+    def includes(self, person: str, date: date) -> bool:
+        return (
+            self.person.lower() == person.lower()
+            and self.start <= date <= self.end
+    )

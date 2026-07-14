@@ -36,15 +36,18 @@ class VacationsReader:
             summary = event["summary"].strip()
 
             replacement = None
+            needs_replacement = False
 
             if " cubre " in summary:
                 person, replacement = summary.split(" cubre ", 1)
 
             elif " pendiente reemplazo" in summary:
                 person = summary.replace(" pendiente reemplazo", "")
+                needs_replacement = True
 
             elif " falta reemplazo" in summary:
                 person = summary.replace(" falta reemplazo", "")
+                needs_replacement = True
 
             else:
                 person = summary
@@ -55,6 +58,7 @@ class VacationsReader:
                     start=event["start"]["date"],
                     end=event["end"]["date"],
                     replacement=replacement.strip() if replacement else None,
+                    needs_replacement=needs_replacement,
                 )
             )
 

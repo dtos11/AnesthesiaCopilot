@@ -21,11 +21,13 @@ class AvailabilityService:
     ):
         self.availability_reader = availability_reader
         self.vacations_reader = vacations_reader
+        self.weekly = availability_reader.read()
+        self.vacations = vacations_reader.read()
 
     def available_on(self, day: date):
 
-        weekly = self.availability_reader.read()
-        vacations = self.vacations_reader.read()
+        weekly = self.weekly
+        vacations = self.vacations
 
         weekday = self.WEEKDAYS[day.strftime("%A")]
 

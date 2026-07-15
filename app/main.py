@@ -1,3 +1,9 @@
+from app.workbook_reader import WorkbookReader
+from app.case_builder import CaseBuilder
+from app.availability_reader import AvailabilityReader
+from app.validators.missing_anesthesiologist import MissingAnesthesiologistValidator
+from app.validators.double_booking import DoubleBookingValidator
+
 from datetime import date
 
 from app.availability_reader import AvailabilityReader
@@ -9,6 +15,9 @@ from app.validators.assigned_while_off import AssignedWhileOffValidator
 from app.validators.double_booking import DoubleBookingValidator
 from app.validators.missing_anesthesiologist import MissingAnesthesiologistValidator
 from app.workbook_reader import WorkbookReader
+from app.privilege_reader import PrivilegeReader
+from app.privilege_service import PrivilegeService
+from app.validators.vte_lopez_privilege import VteLopezPrivilegeValidator
 
 
 def main():
@@ -33,6 +42,19 @@ def main():
         vacations_reader,
     )
 
+    privilege_reader = PrivilegeReader(
+    "sample_data/privilegios.xlsx"
+    )
+
+    privilege_service = PrivilegeService(
+        privilege_reader
+    )
+
+    vte_lopez_validator = VteLopezPrivilegeValidator(
+        privilege_service
+    )
+
+
     print(f"\nFound {len(cases)} scheduled procedures\n")
 
     missing_validator = MissingAnesthesiologistValidator()
@@ -51,6 +73,16 @@ def main():
         cases,
         date(2026, 7, 2)
     )
+
+    vte_lopez_result = vte_lopez_validator.validate(cases)
+
+    print(
+        f"\n{vte_lopez_result.name}: "
+        f"{vte_lopez_result.issue_count}\n"
+    )
+
+    for case in vte_lopez_result.issues:
+        print(case)
 
     print(
         f"\n{assigned_while_off_result.name}: "

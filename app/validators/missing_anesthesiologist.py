@@ -1,5 +1,5 @@
-from validators.validator import Validator
-from models.validation_result import ValidationResult
+from app.validators.validator import Validator
+from app.models.validation_result import ValidationResult
 
 
 class MissingAnesthesiologistValidator(Validator):

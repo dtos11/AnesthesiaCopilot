@@ -1,8 +1,14 @@
-from workbook_reader import WorkbookReader
-from case_builder import CaseBuilder
-from validators.missing_anesthesiologist import MissingAnesthesiologistValidator
-from validators.double_booking import DoubleBookingValidator
-from availability_reader import AvailabilityReader
+from app.workbook_reader import WorkbookReader
+from app.case_builder import CaseBuilder
+from app.availability_reader import AvailabilityReader
+from app.validators.missing_anesthesiologist import MissingAnesthesiologistValidator
+from app.validators.double_booking import DoubleBookingValidator
+
+from datetime import date
+
+from app.availability_service import AvailabilityService
+from app.calendar.google_calendar_client import GoogleCalendarClient
+from app.calendar.vacations_reader import VacationsReader
 
 def main():
     print("=== AnesthesiaCopilot ===\n")
@@ -13,9 +19,28 @@ def main():
     builder = CaseBuilder(reader.workbook)
     cases = builder.build()   
 
-    availability_reader = AvailabilityReader(reader.workbook)
-    availability_reader.read()
+    availability_reader = AvailabilityReader(
+        "sample_data/weekly_availability_template.xlsx"
+)
 
+    vacations_reader = VacationsReader(
+        GoogleCalendarClient()
+)
+    vacations = vacations_reader.read()
+
+    for vacation in vacations:
+        if vacation.includes(vacation.person, date(2026, 7, 21)):
+            print(vacation)
+
+    availability_service = AvailabilityService(
+        availability_reader,
+        vacations_reader,
+)
+
+    today = availability_service.available_on(date(2026, 7, 21))
+
+    print(today["Eduardo"])
+    print(today["Sánchez Crocci"])
 
     print(f"\nFound {len(cases)} scheduled procedures\n")
 

@@ -1,5 +1,5 @@
-from datetime import datetime, UTC
 
+from datetime import datetime, UTC, date
 from app.calendar.google_calendar_client import GoogleCalendarClient
 from app.models.vacation import Vacation
 
@@ -55,8 +55,8 @@ class VacationsReader:
             vacations.append(
                 Vacation(
                     person=person.strip(),
-                    start=event["start"]["date"],
-                    end=event["end"]["date"],
+                    start=date.fromisoformat(event["start"]["date"]),
+                    end=date.fromisoformat(event["end"]["date"]),
                     replacement=replacement.strip() if replacement else None,
                     needs_replacement=needs_replacement,
                 )

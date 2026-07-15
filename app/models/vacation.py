@@ -29,8 +29,5 @@ class Vacation:
 
         return text
 
-    def includes(self, person: str, date: date) -> bool:
-        return (
-            self.person.lower() == person.lower()
-            and self.start <= date <= self.end
-    )
+    def includes(self, day: date) -> bool:
+        return self.start <= day <= self.end

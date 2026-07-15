@@ -38,8 +38,8 @@ class AvailabilityService:
         # Apply calendar overrides
         for vacation in vacations:
 
-            if not vacation.includes(vacation.person, day):
-                continue
+            if not vacation.includes(day):
+                continue        
 
             original_shift = availability.get(vacation.person)
 

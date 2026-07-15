@@ -26,21 +26,14 @@ def main():
     vacations_reader = VacationsReader(
         GoogleCalendarClient()
 )
-    vacations = vacations_reader.read()
-
-    for vacation in vacations:
-        if vacation.includes(vacation.person, date(2026, 7, 21)):
-            print(vacation)
+    vacations = vacations_reader.read()    
 
     availability_service = AvailabilityService(
         availability_reader,
         vacations_reader,
 )
 
-    today = availability_service.available_on(date(2026, 7, 21))
-
-    print(today["Eduardo"])
-    print(today["Sánchez Crocci"])
+    today = availability_service.available_on(date.today())
 
     print(f"\nFound {len(cases)} scheduled procedures\n")
 

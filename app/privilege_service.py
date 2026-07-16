@@ -11,4 +11,13 @@ class PrivilegeService:
         if person is None:
             return False
 
-        return person in self.privileges.get(privilege, set())
+        if privilege not in self.privileges:
+
+            available = ", ".join(sorted(self.privileges.keys()))
+
+            raise ValueError(
+                f"Unknown privilege '{privilege}'. "
+                f"Available privileges: {available}"
+            )
+
+        return person in self.privileges[privilege]

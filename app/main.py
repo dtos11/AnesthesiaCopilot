@@ -12,12 +12,15 @@ from app.calendar.vacations_reader import VacationsReader
 from app.privilege_reader import PrivilegeReader
 from app.privilege_service import PrivilegeService
 
+from app.incompatibility_reader import IncompatibilityReader
+from app.incompatibility_service import IncompatibilityService
+
 from app.validators.missing_anesthesiologist import MissingAnesthesiologistValidator
 from app.validators.assigned_while_off import AssignedWhileOffValidator
 from app.validators.double_booking import DoubleBookingValidator
 from app.validators.vte_lopez_privilege import VteLopezPrivilegeValidator
 from app.validators.pediatrics_privilege import PediatricsPrivilegeValidator
-
+from app.validators.surgeon_incompatibility import SurgeonIncompatibilityValidator
 
 def main():
 
@@ -63,6 +66,18 @@ def main():
     )
 
     # ------------------------------------------------------------------
+    # Incompatibilities
+    # ------------------------------------------------------------------
+
+    incompatibility_reader = IncompatibilityReader(
+        "sample_data/privilegios.xlsx"
+    )
+
+    incompatibility_service = IncompatibilityService(
+        incompatibility_reader
+    )
+
+    # ------------------------------------------------------------------
     # Validators
     # ------------------------------------------------------------------
 
@@ -82,6 +97,10 @@ def main():
 
     double_booking_validator = DoubleBookingValidator()
 
+    surgeon_incompatibility_validator = SurgeonIncompatibilityValidator(
+        incompatibility_service
+    )
+
     # ------------------------------------------------------------------
     # Run validations
     # ------------------------------------------------------------------
@@ -98,6 +117,10 @@ def main():
     pediatrics_result = pediatrics_validator.validate(cases)
 
     double_booking_result = double_booking_validator.validate(cases)
+
+    surgeon_incompatibility_result = (
+        surgeon_incompatibility_validator.validate(cases)
+    )
 
     # ------------------------------------------------------------------
     # Print results
@@ -132,6 +155,14 @@ def main():
     )
 
     for case in assigned_while_off_result.issues:
+        print(case)
+
+    print(
+        f"\n{surgeon_incompatibility_result.name}: "
+        f"{surgeon_incompatibility_result.issue_count}\n"
+    )
+
+    for case in surgeon_incompatibility_result.issues:
         print(case)
 
     print(

@@ -27,7 +27,7 @@ def main():
     reader.read()
 
     builder = CaseBuilder(reader.workbook)
-    cases = builder.build()
+    cases = builder.build()   
 
     availability_reader = AvailabilityReader(
         "sample_data/weekly_availability_template.xlsx"

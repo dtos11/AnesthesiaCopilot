@@ -10,15 +10,22 @@ class PrivilegeReader:
 
         workbook = load_workbook(self.filename)
 
-        sheet = workbook["Privilegios"]
+        privileges = {}
 
-        people = set()
+        for sheet in workbook.worksheets:
 
-        for row in sheet.iter_rows(min_row=2, values_only=True):
-
-            if not row[0]:
+            if sheet.title == "README":
                 continue
 
-            people.add(row[0].strip())
+            people = set()
 
-        return people
+            for row in sheet.iter_rows(min_row=2, values_only=True):
+
+                if not row[0]:
+                    continue
+
+                people.add(row[0].strip())
+
+            privileges[sheet.title] = people
+
+        return privileges

@@ -19,7 +19,10 @@ class VteLopezPrivilegeValidator(Validator):
             if case.anesthesiologist is None:
                 continue
 
-            if self.privilege_service.has(case.anesthesiologist):
+            if self.privilege_service.has(
+                case.anesthesiologist,
+                "VTE Lopez",
+            ):
                 continue
 
             errors.append(case)

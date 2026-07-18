@@ -49,19 +49,28 @@ class ConsoleReport:
         value = ", ".join(names) if names else "<missing>"
         self.line(f"    {label:<7}: {value}")
 
-    def maternidad(self, assignments) -> None:
+    def maternidad(self, previous_day, schedule_day) -> None:
         self.heading("MATERNIDAD")
 
-        self.line("Assigned")
+        self.line("Post-call (previous day)")
+        self.blank()
+        self._obstetrics_assignments(previous_day)
+
         self.blank()
 
-        if assignments:
-            for assignment in assignments:
-                self.line(f"    {assignment.person}")
-        else:
+        self.line("On Call (schedule date)")
+        self.blank()
+        self._obstetrics_assignments(schedule_day)
+
+        self.blank()
+
+    def _obstetrics_assignments(self, assignments) -> None:
+        if not assignments:
             self.line("    <none>")
+            return
 
-        self.blank()
+        for assignment in assignments:
+            self.line(f"    {assignment.person}")
 
     def line(self, text: str = "") -> None:
         self._lines.append(text)

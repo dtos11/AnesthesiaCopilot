@@ -86,7 +86,13 @@ def main():
         MaternidadReader(calendar_client)
     )
 
-    obstetrics_assignments = (
+    previous_day_obstetrics_assignments = (
+        maternidad_service.get_assignments_for_date(
+            schedule_date - timedelta(days=1)
+        )
+    )
+
+    schedule_day_obstetrics_assignments = (
         maternidad_service.get_assignments_for_date(schedule_date)
     )
 
@@ -186,7 +192,10 @@ def main():
         schedule_day_assignments,
     )
 
-    report.maternidad(obstetrics_assignments)
+    report.maternidad(
+        previous_day_obstetrics_assignments,
+        schedule_day_obstetrics_assignments,
+    )
 
     report.heading("VALIDATION SUMMARY")
 

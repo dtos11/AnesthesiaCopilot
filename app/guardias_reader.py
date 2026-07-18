@@ -78,6 +78,12 @@ class GuardiasReader:
 
             assignment_date = date.fromisoformat(start["date"])
 
+            if start_date is not None and assignment_date < start_date:
+                continue
+
+            if end_date is not None and assignment_date > end_date:
+                continue
+
             assignments.append(
                 CallAssignment(
                     date=assignment_date,

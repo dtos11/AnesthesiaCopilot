@@ -11,8 +11,9 @@ class CaseBuilder:
         cases = []
 
         for sheet_name in self.workbook.sheetnames:
+            area = sheet_name.strip()
 
-            if sheet_name == "DISPONIBILIDAD":
+            if area == "DISPONIBILIDAD":
                 continue
 
             sheet = self.workbook[sheet_name]
@@ -24,7 +25,7 @@ class CaseBuilder:
 
                 
 
-                if sheet_name == "ENDOSCOPIA":
+                if area == "ENDOSCOPIA":
                     anesthesia_type = "SEDACIÓN"
                     anesthesiologist = row[8]
                 else:
@@ -32,7 +33,7 @@ class CaseBuilder:
                     anesthesiologist = row[9]
 
                 case = Case(
-    area=sheet_name,
+    area=area,
     operating_room=row[0],
     scheduled_time=row[1],
     duration_minutes=int(row[2]) if row[2] else None,

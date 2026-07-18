@@ -19,7 +19,7 @@ SPANISH_MONTHS = {
 }
 
 FILENAME_PATTERN = re.compile(
-    r"^\s*Lista\s+del\s+(?P<day>\d{1,2})\s+de\s+"
+    r"^\s*Listas?\s+del\s+(?P<day>\d{1,2})\s+de\s+"
     r"(?P<month>[A-Za-z]+)\.xlsx\s*$",
     re.IGNORECASE,
 )
@@ -35,7 +35,8 @@ def infer_schedule_date(
     if match is None:
         raise ValueError(
             "Cannot infer schedule date from filename "
-            f"'{filename}'. Expected 'Lista del <day> de <Spanish month>.xlsx'."
+            f"'{filename}'. Expected 'Lista del <day> de <Spanish month>.xlsx' "
+            "or 'Listas del <day> de <Spanish month>.xlsx'."
         )
 
     month_name = match.group("month").casefold()

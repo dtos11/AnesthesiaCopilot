@@ -19,7 +19,8 @@ SPANISH_MONTHS = {
 }
 
 FILENAME_PATTERN = re.compile(
-    r"^Lista del (?P<day>\d{1,2}) de (?P<month>[A-Za-z]+)\.xlsx$",
+    r"^\s*Lista\s+del\s+(?P<day>\d{1,2})\s+de\s+"
+    r"(?P<month>[A-Za-z]+)\.xlsx\s*$",
     re.IGNORECASE,
 )
 

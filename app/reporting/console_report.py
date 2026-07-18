@@ -72,6 +72,50 @@ class ConsoleReport:
         for assignment in assignments:
             self.line(f"    {assignment.person}")
 
+    def saturday_roster_calendar_integrity(self, result) -> None:
+        self.heading("SATURDAY ROSTER CALENDAR INTEGRITY")
+
+        if result.issue_count > 0:
+            endoscopy_entries = result.issues[0]
+            self.line(
+                "ERROR: Expected exactly one E entry; "
+                f"found {len(endoscopy_entries)}."
+            )
+
+        self.blank()
+
+    def saturday_assignments_outside_roster(self, issues) -> None:
+        self.heading("SATURDAY ASSIGNMENTS OUTSIDE ROSTER")
+
+        if issues:
+            self.line("WARNING: Additional Saturday staff require review.")
+            self.blank()
+
+        for person, cases in issues:
+            area_counts = {}
+
+            for case in cases:
+                area_counts[case.area] = area_counts.get(case.area, 0) + 1
+
+            areas = ", ".join(
+                f"{area} ({count})"
+                for area, count in area_counts.items()
+            )
+            self.line(person)
+            self.line(f"    Cases : {len(cases)}")
+            self.line(f"    Areas : {areas}")
+            self.blank()
+
+        self.blank()
+
+    def endoscopy_assignment(self, issues) -> None:
+        self.heading("ENDOSCOPY ASSIGNMENT")
+
+        for issue in issues:
+            self.line(f"ERROR: {issue}")
+
+        self.blank()
+
     def line(self, text: str = "") -> None:
         self._lines.append(text)
 

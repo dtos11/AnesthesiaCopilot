@@ -28,6 +28,17 @@ class SaturdayRosterService:
         )
         return self._resolve_entries(entries)
 
+    def get_entries_for_slot(
+        self,
+        day: date,
+        slot: str,
+    ) -> list[SaturdayRosterEntry]:
+        return [
+            entry
+            for entry in self.get_entries_for_date(day)
+            if entry.slot == slot
+        ]
+
     def _resolve_entries(
         self,
         raw_entries: list[SaturdayRosterEntry],

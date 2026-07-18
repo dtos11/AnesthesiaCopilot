@@ -12,6 +12,8 @@ from app.guardias_reader import GuardiasReader
 from app.guardias_service import GuardiasService
 from app.maternidad_reader import MaternidadReader
 from app.maternidad_service import MaternidadService
+from app.saturday_roster_reader import SaturdayRosterReader
+from app.saturday_roster_service import SaturdayRosterService
 from app.staff_directory_reader import StaffDirectoryReader
 from app.staff_identity_service import StaffIdentityService
 
@@ -30,6 +32,13 @@ from app.validators.double_booking import DoubleBookingValidator
 from app.validators.vte_lopez_privilege import VteLopezPrivilegeValidator
 from app.validators.pediatrics_privilege import PediatricsPrivilegeValidator
 from app.validators.surgeon_incompatibility import SurgeonIncompatibilityValidator
+from app.validators.saturday_assignments_outside_roster import (
+    SaturdayAssignmentsOutsideRosterValidator,
+)
+from app.validators.saturday_roster_calendar_integrity import (
+    SaturdayRosterCalendarIntegrityValidator,
+)
+from app.validators.endoscopy_assignment import EndoscopyAssignmentValidator
 
 
 def main():
@@ -134,6 +143,11 @@ def main():
         staff_identity_service,
     )
 
+    saturday_roster_service = SaturdayRosterService(
+        SaturdayRosterReader(calendar_client),
+        staff_identity_service,
+    )
+
     # ------------------------------------------------------------------
     # Validators
     # ------------------------------------------------------------------
@@ -164,6 +178,24 @@ def main():
         )
     )
 
+    saturday_assignments_outside_roster_validator = (
+        SaturdayAssignmentsOutsideRosterValidator(
+            saturday_roster_service,
+            staff_identity_service,
+        )
+    )
+
+    saturday_roster_calendar_integrity_validator = (
+        SaturdayRosterCalendarIntegrityValidator(
+            saturday_roster_service
+        )
+    )
+
+    endoscopy_assignment_validator = EndoscopyAssignmentValidator(
+        saturday_roster_service,
+        staff_identity_service,
+    )
+
     # ------------------------------------------------------------------
     # Run validations
     # ------------------------------------------------------------------
@@ -191,6 +223,33 @@ def main():
     surgeon_incompatibility_result = (
         surgeon_incompatibility_validator.validate(cases)
     )
+
+    saturday_assignments_outside_roster_result = None
+    saturday_roster_calendar_integrity_result = None
+    endoscopy_assignment_result = None
+
+    if schedule_date.weekday() == 5:
+        saturday_roster_calendar_integrity_result = (
+            saturday_roster_calendar_integrity_validator.validate(
+                cases,
+                schedule_date,
+            )
+        )
+
+        if saturday_roster_calendar_integrity_result.passed:
+            endoscopy_assignment_result = (
+                endoscopy_assignment_validator.validate(
+                    cases,
+                    schedule_date,
+                )
+            )
+
+        saturday_assignments_outside_roster_result = (
+            saturday_assignments_outside_roster_validator.validate(
+                cases,
+                schedule_date,
+            )
+        )
 
     # ------------------------------------------------------------------
     # Build report
@@ -263,6 +322,36 @@ def main():
         pediatrics_result.name,
         pediatrics_result.issue_count,
     )
+
+    if saturday_roster_calendar_integrity_result is not None:
+        report.field(
+            saturday_roster_calendar_integrity_result.name,
+            saturday_roster_calendar_integrity_result.issue_count,
+        )
+
+        if endoscopy_assignment_result is not None:
+            report.field(
+                endoscopy_assignment_result.name,
+                endoscopy_assignment_result.issue_count,
+            )
+
+        report.field(
+            saturday_assignments_outside_roster_result.name,
+            saturday_assignments_outside_roster_result.issue_count,
+        )
+
+        report.saturday_roster_calendar_integrity(
+            saturday_roster_calendar_integrity_result
+        )
+
+        if endoscopy_assignment_result is not None:
+            report.endoscopy_assignment(
+                endoscopy_assignment_result.issues
+            )
+
+        report.saturday_assignments_outside_roster(
+            saturday_assignments_outside_roster_result.issues
+        )
 
     report.heading("DETAILS")
 

@@ -1,5 +1,6 @@
 from datetime import date, datetime, timedelta
 
+from app.file_picker import choose_excel_file
 from app.workbook_reader import WorkbookReader
 from app.case_builder import CaseBuilder
 
@@ -45,11 +46,17 @@ def main():
 
     schedule_date = date(2026, 7, 17)
 
+    workbook_path = choose_excel_file("Choose schedule workbook")
+
+    if workbook_path is None:
+        print("No schedule workbook selected. Exiting.")
+        return
+
     # ------------------------------------------------------------------
     # Read schedule
     # ------------------------------------------------------------------
 
-    reader = WorkbookReader("sample_data/sample_schedule.xlsx")
+    reader = WorkbookReader(workbook_path)
     reader.read()
 
     builder = CaseBuilder(reader.workbook)

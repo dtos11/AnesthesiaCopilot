@@ -59,14 +59,17 @@ def main():
     reader = WorkbookReader(workbook_path)
     reader.read()
 
-    builder = CaseBuilder(reader.workbook)
-    cases = builder.build()
-
     staff_identity_service = StaffIdentityService(
         StaffDirectoryReader(
             "sample_data/department_staff.xlsx"
         )
     )
+
+    builder = CaseBuilder(
+        reader.workbook,
+        staff_identity_service,
+    )
+    cases = builder.build()
 
     # ------------------------------------------------------------------
     # Availability

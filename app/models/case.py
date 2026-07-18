@@ -13,6 +13,7 @@ class Case:
     surgeon: str
     anesthesia_type: str
     anesthesiologist: str | None
+    anesthesiologist_notation: str | None = None
 
     def __str__(self):
 

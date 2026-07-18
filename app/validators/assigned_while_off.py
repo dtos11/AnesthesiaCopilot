@@ -9,8 +9,6 @@ class AssignedWhileOffValidator(Validator):
 
     def validate(self, cases, day):
 
-        availability = self.availability_service.available_on(day)
-
         issues = []
 
         for case in cases:
@@ -21,7 +19,13 @@ class AssignedWhileOffValidator(Validator):
             if case.anesthesiologist is None:
                 continue
 
-            if availability.get(case.anesthesiologist) == "OFF":
+            if (
+                self.availability_service.availability_for(
+                    case.anesthesiologist,
+                    day,
+                )
+                == "OFF"
+            ):
                 issues.append(case)
 
         return ValidationResult(

@@ -12,6 +12,8 @@ from app.guardias_reader import GuardiasReader
 from app.guardias_service import GuardiasService
 from app.maternidad_reader import MaternidadReader
 from app.maternidad_service import MaternidadService
+from app.staff_directory_reader import StaffDirectoryReader
+from app.staff_identity_service import StaffIdentityService
 
 from app.privilege_reader import PrivilegeReader
 from app.privilege_service import PrivilegeService
@@ -44,6 +46,12 @@ def main():
     builder = CaseBuilder(reader.workbook)
     cases = builder.build()
 
+    staff_identity_service = StaffIdentityService(
+        StaffDirectoryReader(
+            "sample_data/department_staff.xlsx"
+        )
+    )
+
     # ------------------------------------------------------------------
     # Availability
     # ------------------------------------------------------------------
@@ -59,6 +67,7 @@ def main():
     availability_service = AvailabilityService(
         availability_reader,
         vacations_reader,
+        staff_identity_service,
     )
 
     # ------------------------------------------------------------------
@@ -84,7 +93,8 @@ def main():
     # ------------------------------------------------------------------
 
     maternidad_service = MaternidadService(
-        MaternidadReader(calendar_client)
+        MaternidadReader(calendar_client),
+        staff_identity_service,
     )
 
     previous_day_obstetrics_assignments = (

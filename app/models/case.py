@@ -16,7 +16,7 @@ class Case:
 
     def __str__(self):
 
-        anesthesiologist = self.anesthesiologist or "LOCAL"
+        anesthesiologist = self.anesthesiologist or "<unassigned>"
 
         return (
             f"{self.scheduled_time.strftime('%H:%M')} | "

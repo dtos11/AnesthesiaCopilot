@@ -75,7 +75,8 @@ def main():
     # ------------------------------------------------------------------
 
     guardias_service = GuardiasService(
-        GuardiasReader(calendar_client)
+        GuardiasReader(calendar_client),
+        staff_identity_service,
     )
 
     previous_day_assignments = (

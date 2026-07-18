@@ -10,6 +10,8 @@ from app.calendar.google_calendar_client import GoogleCalendarClient
 from app.calendar.vacations_reader import VacationsReader
 from app.guardias_reader import GuardiasReader
 from app.guardias_service import GuardiasService
+from app.maternidad_reader import MaternidadReader
+from app.maternidad_service import MaternidadService
 
 from app.privilege_reader import PrivilegeReader
 from app.privilege_service import PrivilegeService
@@ -74,6 +76,18 @@ def main():
 
     schedule_day_assignments = (
         guardias_service.get_assignments_for_date(schedule_date)
+    )
+
+    # ------------------------------------------------------------------
+    # Maternidad
+    # ------------------------------------------------------------------
+
+    maternidad_service = MaternidadService(
+        MaternidadReader(calendar_client)
+    )
+
+    obstetrics_assignments = (
+        maternidad_service.get_assignments_for_date(schedule_date)
     )
 
     # ------------------------------------------------------------------
@@ -171,6 +185,8 @@ def main():
         previous_day_assignments,
         schedule_day_assignments,
     )
+
+    report.maternidad(obstetrics_assignments)
 
     report.heading("VALIDATION SUMMARY")
 

@@ -49,6 +49,20 @@ class ConsoleReport:
         value = ", ".join(names) if names else "<missing>"
         self.line(f"    {label:<7}: {value}")
 
+    def maternidad(self, assignments) -> None:
+        self.heading("MATERNIDAD")
+
+        self.line("Assigned")
+        self.blank()
+
+        if assignments:
+            for assignment in assignments:
+                self.line(f"    {assignment.person}")
+        else:
+            self.line("    <none>")
+
+        self.blank()
+
     def line(self, text: str = "") -> None:
         self._lines.append(text)
 

@@ -30,4 +30,4 @@ class Vacation:
         return text
 
     def includes(self, day: date) -> bool:
-        return self.start <= day <= self.end
+        return self.start <= day < self.end

@@ -8,24 +8,19 @@ class Vacation:
         person: str,
         start: date,
         end: date,
-        replacement: str | None = None,
-        needs_replacement: bool = False,
+        notation: str | None = None,
     ):
         self.person = person
         self.start = start
         self.end = end
-        self.replacement = replacement
-        self.needs_replacement = needs_replacement
+        self.notation = notation
 
     def __str__(self):
 
         text = f"{self.person} ({self.start} - {self.end})"
 
-        if self.replacement:
-            text += f" -> {self.replacement}"
-
-        if self.needs_replacement:
-            text += " [needs replacement]"
+        if self.notation:
+            text += f" [{self.notation}]"
 
         return text
 

@@ -1,4 +1,5 @@
 from datetime import date
+import re
 import warnings
 
 from app.availability_reader import AvailabilityReader
@@ -49,11 +50,12 @@ class AvailabilityService:
                 continue        
 
             original_shift = availability.get(vacation.person)
-
             availability[vacation.person] = "OFF"
 
-            if vacation.replacement:
-                availability[vacation.replacement] = original_shift
+            covered_person = self._covered_person(vacation.notation)
+
+            if covered_person is not None:
+                availability[covered_person] = original_shift
 
         return availability
 
@@ -83,42 +85,57 @@ class AvailabilityService:
         vacations = []
 
         for vacation in vacations_reader.read():
-            person = self._resolve_source_name(
-                vacation.person,
-                "vacations",
-            )
+            parsed_vacation = self._parse_vacation(vacation)
 
-            if person is None:
+            if parsed_vacation is None:
                 continue
 
-            replacement = None
-
-            if vacation.replacement:
-                replacement = self._resolve_source_name(
-                    vacation.replacement,
-                    "vacations",
-                )
-
+            person = self.staff_identity_service.resolve(
+                parsed_vacation.person
+            )
             vacations.append(
                 Vacation(
                     person=person,
-                    start=vacation.start,
-                    end=vacation.end,
-                    replacement=replacement,
-                    needs_replacement=vacation.needs_replacement,
+                    start=parsed_vacation.start,
+                    end=parsed_vacation.end,
+                    notation=parsed_vacation.notation,
                 )
             )
 
         return vacations
 
-    def _resolve_source_name(self, raw_name: str, source: str):
-        identity = self.staff_identity_service.try_resolve(raw_name)
+    def _parse_vacation(self, vacation: Vacation) -> Vacation | None:
+        summary = vacation.person.strip()
+        words = list(re.finditer(r"\S+", summary))
 
-        if identity.resolved:
-            return identity.his_full_name
+        for word in reversed(words):
+            raw_person = summary[:word.end()]
+            identity = self.staff_identity_service.try_resolve(raw_person)
 
-        self._warn_unknown(raw_name, source)
+            if not identity.resolved:
+                continue
+
+            notation = summary[word.end():].strip() or None
+            return Vacation(
+                person=raw_person,
+                start=vacation.start,
+                end=vacation.end,
+                notation=notation,
+            )
+
+        self._warn_unknown(summary, "vacations")
         return None
+
+    def _covered_person(self, notation: str | None) -> str | None:
+        prefix = "cubre "
+
+        if notation is None or not notation.startswith(prefix):
+            return None
+
+        identity = self.staff_identity_service.try_resolve(
+            notation[len(prefix):].strip()
+        )
+        return identity.his_full_name
 
     def _warn_unknown(self, raw_name: str, source: str) -> None:
         warning_key = (source, str(raw_name).strip().casefold())

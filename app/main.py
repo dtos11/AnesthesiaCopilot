@@ -130,7 +130,8 @@ def main():
     )
 
     incompatibility_service = IncompatibilityService(
-        incompatibility_reader
+        incompatibility_reader,
+        staff_identity_service,
     )
 
     # ------------------------------------------------------------------

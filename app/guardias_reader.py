@@ -1,15 +1,11 @@
-from dataclasses import dataclass
 from datetime import date, datetime, time, timezone
 from typing import Optional
 
 from app.calendar.google_calendar_client import GoogleCalendarClient
+from app.models.call_assignment import CallAssignment
 
 
-@dataclass
-class CallAssignment:
-    date: date
-    role: int
-    person: str
+GUARDIAS_CALENDAR_ID = "7i6h1n0bmkmatdiphu1hv98n40@group.calendar.google.com"
 
 
 class GuardiasReader:
@@ -24,7 +20,7 @@ class GuardiasReader:
 
     def read(
         self,
-        calendar_id: str,
+        calendar_id: str = GUARDIAS_CALENDAR_ID,
         start_date: Optional[date] = None,
         end_date: Optional[date] = None,
     ) -> list[CallAssignment]:

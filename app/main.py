@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime, timedelta
 
 from app.workbook_reader import WorkbookReader
 from app.case_builder import CaseBuilder
@@ -8,12 +8,16 @@ from app.availability_service import AvailabilityService
 
 from app.calendar.google_calendar_client import GoogleCalendarClient
 from app.calendar.vacations_reader import VacationsReader
+from app.guardias_reader import GuardiasReader
+from app.guardias_service import GuardiasService
 
 from app.privilege_reader import PrivilegeReader
 from app.privilege_service import PrivilegeService
 
 from app.incompatibility_reader import IncompatibilityReader
 from app.incompatibility_service import IncompatibilityService
+
+from app.reporting.console_report import ConsoleReport
 
 from app.validators.missing_anesthesiologist import MissingAnesthesiologistValidator
 from app.validators.assigned_while_off import AssignedWhileOffValidator
@@ -22,9 +26,10 @@ from app.validators.vte_lopez_privilege import VteLopezPrivilegeValidator
 from app.validators.pediatrics_privilege import PediatricsPrivilegeValidator
 from app.validators.surgeon_incompatibility import SurgeonIncompatibilityValidator
 
+
 def main():
 
-    print("=== AnesthesiaCopilot ===\n")
+    schedule_date = date(2026, 7, 17)
 
     # ------------------------------------------------------------------
     # Read schedule
@@ -44,13 +49,31 @@ def main():
         "sample_data/weekly_availability_template.xlsx"
     )
 
-    vacations_reader = VacationsReader(
-        GoogleCalendarClient()
-    )
+    calendar_client = GoogleCalendarClient()
+
+    vacations_reader = VacationsReader(calendar_client)
 
     availability_service = AvailabilityService(
         availability_reader,
         vacations_reader,
+    )
+
+    # ------------------------------------------------------------------
+    # Guardias
+    # ------------------------------------------------------------------
+
+    guardias_service = GuardiasService(
+        GuardiasReader(calendar_client)
+    )
+
+    previous_day_assignments = (
+        guardias_service.get_assignments_for_date(
+            schedule_date - timedelta(days=1)
+        )
+    )
+
+    schedule_day_assignments = (
+        guardias_service.get_assignments_for_date(schedule_date)
     )
 
     # ------------------------------------------------------------------
@@ -97,8 +120,10 @@ def main():
 
     double_booking_validator = DoubleBookingValidator()
 
-    surgeon_incompatibility_validator = SurgeonIncompatibilityValidator(
-        incompatibility_service
+    surgeon_incompatibility_validator = (
+        SurgeonIncompatibilityValidator(
+            incompatibility_service
+        )
     )
 
     # ------------------------------------------------------------------
@@ -123,57 +148,125 @@ def main():
     )
 
     # ------------------------------------------------------------------
-    # Print results
+    # Build report
     # ------------------------------------------------------------------
 
-    print(f"\nFound {len(cases)} scheduled procedures\n")
+    report = ConsoleReport()
 
-    print(f"\n{missing_result.name}: {missing_result.issue_count}\n")
+    report.title("AnesthesiaCopilot")
 
-    for case in missing_result.issues:
-        print(case)
-
-    print(
-        f"\n{vte_lopez_result.name}: "
-        f"{vte_lopez_result.issue_count}\n"
+    report.field(
+        "Schedule Date",
+        schedule_date.strftime("%A %d %b %Y"),
     )
 
-    for case in vte_lopez_result.issues:
-        print(case)
-
-    print(
-        f"\n{pediatrics_result.name}: "
-        f"{pediatrics_result.issue_count}\n"
+    report.field(
+        "Generated",
+        datetime.now().strftime("%A %d %b %Y %H:%M"),
     )
 
-    for case in pediatrics_result.issues:
-        print(case)
+    report.blank()
 
-    print(
-        f"\n{assigned_while_off_result.name}: "
-        f"{assigned_while_off_result.issue_count}\n"
+    report.guardias(
+        previous_day_assignments,
+        schedule_day_assignments,
     )
 
-    for case in assigned_while_off_result.issues:
-        print(case)
+    report.heading("VALIDATION SUMMARY")
 
-    print(
-        f"\n{surgeon_incompatibility_result.name}: "
-        f"{surgeon_incompatibility_result.issue_count}\n"
+    report.field(
+        "Scheduled procedures",
+        len(cases),
     )
 
-    for case in surgeon_incompatibility_result.issues:
-        print(case)
-
-    print(
-        f"\n{double_booking_result.name}: "
-        f"{double_booking_result.issue_count}\n"
+    report.field(
+        missing_result.name,
+        missing_result.issue_count,
     )
 
-    for current, next_case in double_booking_result.issues:
-        print(f"\nDOUBLE BOOKING: {current.anesthesiologist}")
-        print(current)
-        print(next_case)
+    report.field(
+        assigned_while_off_result.name,
+        assigned_while_off_result.issue_count,
+    )
+
+    report.field(
+        double_booking_result.name,
+        double_booking_result.issue_count,
+    )
+
+    report.field(
+        surgeon_incompatibility_result.name,
+        surgeon_incompatibility_result.issue_count,
+    )
+
+    report.field(
+        vte_lopez_result.name,
+        vte_lopez_result.issue_count,
+    )
+
+    report.field(
+        pediatrics_result.name,
+        pediatrics_result.issue_count,
+    )
+
+    report.heading("DETAILS")
+
+    if missing_result.issue_count > 0:
+        report.line(missing_result.name)
+        report.separator()
+
+        for case in missing_result.issues:
+            report.line(str(case))
+
+        report.blank()
+
+    if assigned_while_off_result.issue_count > 0:
+        report.line(assigned_while_off_result.name)
+        report.separator()
+
+        for case in assigned_while_off_result.issues:
+            report.line(str(case))
+
+        report.blank()
+
+    if surgeon_incompatibility_result.issue_count > 0:
+        report.line(surgeon_incompatibility_result.name)
+        report.separator()
+
+        for case in surgeon_incompatibility_result.issues:
+            report.line(str(case))
+
+        report.blank()
+
+    if vte_lopez_result.issue_count > 0:
+        report.line(vte_lopez_result.name)
+        report.separator()
+
+        for case in vte_lopez_result.issues:
+            report.line(str(case))
+
+        report.blank()
+
+    if pediatrics_result.issue_count > 0:
+        report.line(pediatrics_result.name)
+        report.separator()
+
+        for case in pediatrics_result.issues:
+            report.line(str(case))
+
+        report.blank()
+
+    if double_booking_result.issue_count > 0:
+        report.line(double_booking_result.name)
+        report.separator()
+
+        for current, next_case in double_booking_result.issues:
+            report.line(f"DOUBLE BOOKING: {current.anesthesiologist}")
+            report.line(str(current))
+            report.line(str(next_case))
+            report.blank()
+
+    print(report.render())
 
 
 if __name__ == "__main__":

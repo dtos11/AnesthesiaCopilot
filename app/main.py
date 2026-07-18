@@ -117,7 +117,8 @@ def main():
     )
 
     privilege_service = PrivilegeService(
-        privilege_reader
+        privilege_reader,
+        staff_identity_service,
     )
 
     # ------------------------------------------------------------------

@@ -23,6 +23,7 @@ from app.reporting.console_report import ConsoleReport
 
 from app.validators.missing_anesthesiologist import MissingAnesthesiologistValidator
 from app.validators.assigned_while_off import AssignedWhileOffValidator
+from app.validators.assigned_while_ob_call import AssignedWhileObCallValidator
 from app.validators.double_booking import DoubleBookingValidator
 from app.validators.vte_lopez_privilege import VteLopezPrivilegeValidator
 from app.validators.pediatrics_privilege import PediatricsPrivilegeValidator
@@ -130,6 +131,10 @@ def main():
         availability_service
     )
 
+    assigned_while_ob_call_validator = AssignedWhileObCallValidator(
+        maternidad_service
+    )
+
     vte_lopez_validator = VteLopezPrivilegeValidator(
         privilege_service
     )
@@ -155,6 +160,13 @@ def main():
     assigned_while_off_result = assigned_while_off_validator.validate(
         cases,
         date(2026, 7, 2)
+    )
+
+    assigned_while_ob_call_result = (
+        assigned_while_ob_call_validator.validate(
+            cases,
+            schedule_date,
+        )
     )
 
     vte_lopez_result = vte_lopez_validator.validate(cases)
@@ -215,6 +227,11 @@ def main():
     )
 
     report.field(
+        assigned_while_ob_call_result.name,
+        assigned_while_ob_call_result.issue_count,
+    )
+
+    report.field(
         double_booking_result.name,
         double_booking_result.issue_count,
     )
@@ -250,6 +267,15 @@ def main():
         report.separator()
 
         for case in assigned_while_off_result.issues:
+            report.line(str(case))
+
+        report.blank()
+
+    if assigned_while_ob_call_result.issue_count > 0:
+        report.line(assigned_while_ob_call_result.name)
+        report.separator()
+
+        for case in assigned_while_ob_call_result.issues:
             report.line(str(case))
 
         report.blank()

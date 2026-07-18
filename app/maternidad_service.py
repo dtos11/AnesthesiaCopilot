@@ -8,12 +8,16 @@ class MaternidadService:
 
     def __init__(self, maternidad_reader: MaternidadReader):
         self.maternidad_reader = maternidad_reader
+        self._assignments_by_date: dict[date, list[ObstetricsAssignment]] = {}
 
     def get_assignments_for_date(
         self,
         day: date,
     ) -> list[ObstetricsAssignment]:
-        return self.maternidad_reader.read(day)
+        if day not in self._assignments_by_date:
+            self._assignments_by_date[day] = self.maternidad_reader.read(day)
+
+        return self._assignments_by_date[day]
 
     def is_assigned(self, person: str, day: date) -> bool:
         expected = self._normalize(person)

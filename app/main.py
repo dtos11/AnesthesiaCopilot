@@ -1,4 +1,4 @@
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 
 from app.file_picker import choose_excel_file
 from app.schedule_date_inference import infer_schedule_date
@@ -209,10 +209,13 @@ def main():
 
     missing_result = missing_validator.validate(cases)
 
-    assigned_while_off_result = assigned_while_off_validator.validate(
-        cases,
-        date(2026, 7, 2)
-    )
+    assigned_while_off_result = None
+
+    if schedule_date.weekday() != 5:
+        assigned_while_off_result = assigned_while_off_validator.validate(
+            cases,
+            schedule_date,
+        )
 
     assigned_while_ob_call_result = (
         assigned_while_ob_call_validator.validate(
@@ -300,10 +303,11 @@ def main():
         missing_result.issue_count,
     )
 
-    report.field(
-        assigned_while_off_result.name,
-        assigned_while_off_result.issue_count,
-    )
+    if assigned_while_off_result is not None:
+        report.field(
+            assigned_while_off_result.name,
+            assigned_while_off_result.issue_count,
+        )
 
     report.field(
         assigned_while_ob_call_result.name,
@@ -371,7 +375,10 @@ def main():
 
         report.blank()
 
-    if assigned_while_off_result.issue_count > 0:
+    if (
+        assigned_while_off_result is not None
+        and assigned_while_off_result.issue_count > 0
+    ):
         report.line(assigned_while_off_result.name)
         report.separator()
 

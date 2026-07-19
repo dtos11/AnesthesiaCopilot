@@ -1,4 +1,5 @@
 import re
+from datetime import date
 
 from app.models.case import Case
 from app.staff_identity_service import StaffIdentityService
@@ -9,9 +10,11 @@ class CaseBuilder:
     def __init__(
         self,
         workbook,
+        schedule_date: date,
         staff_identity_service: StaffIdentityService,
     ):
         self.workbook = workbook
+        self.schedule_date = schedule_date
         self.staff_identity_service = staff_identity_service
 
     def build(self):
@@ -46,16 +49,17 @@ class CaseBuilder:
                 ) = self._parse_anesthesiologist(anesthesiologist)
 
                 case = Case(
-    area=area,
-    operating_room=row[0],
-    scheduled_time=row[1],
-    duration_minutes=int(row[2]) if row[2] else None,
-    patient=row[4],
-    surgeon=row[5],
-    anesthesia_type=anesthesia_type,
-    anesthesiologist=anesthesiologist or None,
-    anesthesiologist_notation=anesthesiologist_notation,
-)
+                    date=self.schedule_date,
+                    area=area,
+                    operating_room=row[0],
+                    scheduled_time=row[1],
+                    duration_minutes=int(row[2]) if row[2] else None,
+                    patient=row[4],
+                    surgeon=row[5],
+                    anesthesia_type=anesthesia_type,
+                    anesthesiologist=anesthesiologist or None,
+                    anesthesiologist_notation=anesthesiologist_notation,
+                )
 
                 cases.append(case)
 

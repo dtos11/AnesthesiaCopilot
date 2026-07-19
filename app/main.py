@@ -67,6 +67,7 @@ def main():
 
     builder = CaseBuilder(
         reader.workbook,
+        schedule_date,
         staff_identity_service,
     )
     cases = builder.build()

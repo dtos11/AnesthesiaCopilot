@@ -1,10 +1,11 @@
 import re
 from dataclasses import dataclass
-from datetime import datetime, time, timedelta
+from datetime import date, datetime, time, timedelta
 
 
 @dataclass
 class Case:
+    date: date
     area: str
     operating_room: str
     scheduled_time: time

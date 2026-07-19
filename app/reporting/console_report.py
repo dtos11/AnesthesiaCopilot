@@ -72,6 +72,23 @@ class ConsoleReport:
         for assignment in assignments:
             self.line(f"    {assignment.person}")
 
+    def availability_overrides(self, overrides) -> None:
+        self.heading("AVAILABILITY OVERRIDES")
+
+        if not overrides:
+            self.line("    None")
+            self.blank()
+            return
+
+        for availability_override in overrides:
+            self.line(availability_override.person)
+            self.blank()
+
+            for instruction in availability_override.instructions:
+                self.line(f"    {instruction}")
+
+            self.blank()
+
     def saturday_roster_calendar_integrity(self, result) -> None:
         self.heading("SATURDAY ROSTER CALENDAR INTEGRITY")
 

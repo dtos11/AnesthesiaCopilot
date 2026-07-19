@@ -7,6 +7,8 @@ from app.case_builder import CaseBuilder
 
 from app.availability_reader import AvailabilityReader
 from app.availability_service import AvailabilityService
+from app.availability_override_service import AvailabilityOverrideService
+from app.availability_overrides_reader import AvailabilityOverridesReader
 
 from app.calendar.google_calendar_client import GoogleCalendarClient
 from app.calendar.vacations_reader import VacationsReader
@@ -92,6 +94,17 @@ def main():
         availability_reader,
         vacations_reader,
         staff_identity_service,
+    )
+
+    availability_override_service = AvailabilityOverrideService(
+        AvailabilityOverridesReader(calendar_client),
+        staff_identity_service,
+    )
+
+    availability_overrides = (
+        availability_override_service.get_overrides_for_date(
+            schedule_date
+        )
     )
 
     # ------------------------------------------------------------------
@@ -316,6 +329,8 @@ def main():
         previous_day_obstetrics_assignments,
         schedule_day_obstetrics_assignments,
     )
+
+    report.availability_overrides(availability_overrides)
 
     report.heading("VALIDATION SUMMARY")
 

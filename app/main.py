@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from app.file_picker import choose_excel_file
 from app.schedule_date_inference import infer_schedule_date
@@ -12,6 +12,7 @@ from app.availability_overrides_reader import AvailabilityOverridesReader
 
 from app.calendar.google_calendar_client import GoogleCalendarClient
 from app.calendar.vacations_reader import VacationsReader
+from app.department_state_service import DepartmentStateService
 from app.guardias_reader import GuardiasReader
 from app.guardias_service import GuardiasService
 from app.maternidad_reader import MaternidadReader
@@ -101,12 +102,6 @@ def main():
         staff_identity_service,
     )
 
-    availability_overrides = (
-        availability_override_service.get_overrides_for_date(
-            schedule_date
-        )
-    )
-
     # ------------------------------------------------------------------
     # Guardias
     # ------------------------------------------------------------------
@@ -116,16 +111,6 @@ def main():
         staff_identity_service,
     )
 
-    previous_day_assignments = (
-        guardias_service.get_assignments_for_date(
-            schedule_date - timedelta(days=1)
-        )
-    )
-
-    schedule_day_assignments = (
-        guardias_service.get_assignments_for_date(schedule_date)
-    )
-
     # ------------------------------------------------------------------
     # Maternidad
     # ------------------------------------------------------------------
@@ -133,16 +118,6 @@ def main():
     maternidad_service = MaternidadService(
         MaternidadReader(calendar_client),
         staff_identity_service,
-    )
-
-    previous_day_obstetrics_assignments = (
-        maternidad_service.get_assignments_for_date(
-            schedule_date - timedelta(days=1)
-        )
-    )
-
-    schedule_day_obstetrics_assignments = (
-        maternidad_service.get_assignments_for_date(schedule_date)
     )
 
     # ------------------------------------------------------------------
@@ -179,6 +154,18 @@ def main():
     patient_request_service = PatientRequestService(
         PatientRequestsReader(calendar_client),
         staff_identity_service,
+    )
+
+    department_state_service = DepartmentStateService(
+        availability_service,
+        guardias_service,
+        maternidad_service,
+        availability_override_service,
+        patient_request_service,
+    )
+
+    department_state = department_state_service.get_state_for_date(
+        schedule_date
     )
 
     # ------------------------------------------------------------------
@@ -262,11 +249,8 @@ def main():
         surgeon_incompatibility_validator.validate(cases)
     )
 
-    patient_requests = patient_request_service.get_requests_for_date(
-        schedule_date
-    )
     patient_request_matches = PatientRequestMatcher().match(
-        patient_requests,
+        department_state.patient_requests,
         cases,
     )
     patient_request_result = patient_request_validator.validate(
@@ -321,16 +305,18 @@ def main():
     report.blank()
 
     report.guardias(
-        previous_day_assignments,
-        schedule_day_assignments,
+        department_state.first_postcall + department_state.second_postcall,
+        department_state.first_call + department_state.second_call,
     )
 
     report.maternidad(
-        previous_day_obstetrics_assignments,
-        schedule_day_obstetrics_assignments,
+        department_state.postcall,
+        department_state.on_call,
     )
 
-    report.availability_overrides(availability_overrides)
+    report.availability_overrides(
+        department_state.availability_overrides
+    )
 
     report.heading("VALIDATION SUMMARY")
 

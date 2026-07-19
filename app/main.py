@@ -318,6 +318,11 @@ def main():
         department_state.availability_overrides
     )
 
+    report.department_state(
+        department_state.staff_states,
+        list(availability_service.weekly),
+    )
+
     report.heading("VALIDATION SUMMARY")
 
     report.field(

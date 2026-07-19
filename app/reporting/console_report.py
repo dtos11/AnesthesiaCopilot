@@ -89,6 +89,37 @@ class ConsoleReport:
 
             self.blank()
 
+    def department_state(self, staff_states, weekly_order) -> None:
+        self.heading("DEPARTMENT STATE")
+
+        order_by_person = {
+            person: index
+            for index, person in enumerate(weekly_order)
+        }
+        ordered_states = sorted(
+            enumerate(staff_states),
+            key=lambda item: (
+                order_by_person.get(
+                    item[1].person,
+                    len(order_by_person) + item[0],
+                )
+            ),
+        )
+
+        for _, staff_state in ordered_states:
+            availability = staff_state.availability
+
+            if isinstance(availability, list):
+                availability = " / ".join(availability)
+            elif availability is None:
+                availability = "None"
+
+            self.line(
+                f"{staff_state.person:<32}{availability}"
+            )
+
+        self.blank()
+
     def saturday_roster_calendar_integrity(self, result) -> None:
         self.heading("SATURDAY ROSTER CALENDAR INTEGRITY")
 

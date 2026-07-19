@@ -3,6 +3,7 @@ import warnings
 from app.incompatibility_reader import IncompatibilityReader
 from app.staff_directory_reader import normalize_staff_name
 from app.staff_identity_service import StaffIdentityService
+from app.staff_warning import unresolved_staff_message
 
 
 class IncompatibilityService:
@@ -56,8 +57,15 @@ class IncompatibilityService:
             return
 
         self._warned_unknowns.add(warning_key)
-        warnings.warn(
+        message = (
             f"Unresolved staff identity from incompatibilities: "
-            f"'{raw_name}'",
+            f"'{raw_name}'"
+        )
+        warnings.warn(
+            unresolved_staff_message(
+                message,
+                raw_name,
+                self.staff_identity_service,
+            ),
             stacklevel=2,
         )

@@ -5,6 +5,7 @@ from app.models.saturday_roster_entry import SaturdayRosterEntry
 from app.saturday_roster_reader import SaturdayRosterReader
 from app.staff_directory_reader import normalize_staff_name
 from app.staff_identity_service import StaffIdentityService
+from app.staff_warning import unresolved_staff_message
 
 
 class SaturdayRosterService:
@@ -71,8 +72,15 @@ class SaturdayRosterService:
             return
 
         self._warned_unknowns.add(warning_key)
-        warnings.warn(
+        message = (
             f"Unresolved staff identity from Saturday roster: "
-            f"'{raw_name}'",
+            f"'{raw_name}'"
+        )
+        warnings.warn(
+            unresolved_staff_message(
+                message,
+                raw_name,
+                self.staff_identity_service,
+            ),
             stacklevel=2,
         )

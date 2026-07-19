@@ -3,6 +3,7 @@ import warnings
 from app.privilege_reader import PrivilegeReader
 from app.staff_directory_reader import normalize_staff_name
 from app.staff_identity_service import StaffIdentityService
+from app.staff_warning import unresolved_staff_message
 
 
 class PrivilegeService:
@@ -65,7 +66,14 @@ class PrivilegeService:
             return
 
         self._warned_unknowns.add(warning_key)
+        message = (
+            f"Unresolved staff identity from privileges: '{raw_name}'"
+        )
         warnings.warn(
-            f"Unresolved staff identity from privileges: '{raw_name}'",
+            unresolved_staff_message(
+                message,
+                raw_name,
+                self.staff_identity_service,
+            ),
             stacklevel=2,
         )

@@ -5,6 +5,7 @@ from app.guardias_reader import GuardiasReader
 from app.models.call_assignment import CallAssignment
 from app.staff_directory_reader import normalize_staff_name
 from app.staff_identity_service import StaffIdentityService
+from app.staff_warning import unresolved_staff_message
 
 
 class GuardiasService:
@@ -57,7 +58,14 @@ class GuardiasService:
             return
 
         self._warned_unknowns.add(warning_key)
+        message = (
+            f"Unresolved staff identity from Guardias: '{raw_name}'"
+        )
         warnings.warn(
-            f"Unresolved staff identity from Guardias: '{raw_name}'",
+            unresolved_staff_message(
+                message,
+                raw_name,
+                self.staff_identity_service,
+            ),
             stacklevel=2,
         )

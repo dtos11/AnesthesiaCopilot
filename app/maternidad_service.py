@@ -4,6 +4,7 @@ import warnings
 from app.maternidad_reader import MaternidadReader
 from app.models.obstetrics_assignment import ObstetricsAssignment
 from app.staff_identity_service import StaffIdentityService
+from app.staff_warning import unresolved_staff_message
 
 
 class MaternidadService:
@@ -64,8 +65,13 @@ class MaternidadService:
             return
 
         self._warned_unknowns.add(warning_key)
+        message = f"Unresolved staff identity from {source}: '{raw_name}'"
         warnings.warn(
-            f"Unresolved staff identity from {source}: '{raw_name}'",
+            unresolved_staff_message(
+                message,
+                raw_name,
+                self.staff_identity_service,
+            ),
             stacklevel=2,
         )
 

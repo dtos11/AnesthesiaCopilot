@@ -142,7 +142,7 @@ class DepartmentStateService:
             isinstance(availability, str)
             and availability.strip().casefold() == "ob"
         ):
-            return None
+            return "OFF"
 
         return availability
 

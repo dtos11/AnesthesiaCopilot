@@ -116,6 +116,33 @@ class ConsoleReport:
 
         self.blank()
 
+    def patient_request_violations(self, violations) -> None:
+        if not violations:
+            return
+
+        self.line("Patient requests violated")
+        self.separator()
+
+        for violation in violations:
+            match = violation.match
+            self.field("Patient", match.request.patient)
+            self.field(
+                "Requested",
+                match.request.requested_anesthesiologist,
+            )
+            self.field(
+                "Assigned",
+                match.case.anesthesiologist or "<unassigned>",
+            )
+            self.field("Surgeon", match.request.surgeon)
+            self.field("Area", match.case.area)
+            self.field("Operating room", match.case.operating_room)
+            self.field(
+                "Scheduled time",
+                match.case.scheduled_time.strftime("%H:%M"),
+            )
+            self.blank()
+
     def line(self, text: str = "") -> None:
         self._lines.append(text)
 

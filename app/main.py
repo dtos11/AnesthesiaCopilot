@@ -14,6 +14,9 @@ from app.guardias_reader import GuardiasReader
 from app.guardias_service import GuardiasService
 from app.maternidad_reader import MaternidadReader
 from app.maternidad_service import MaternidadService
+from app.patient_request_matcher import PatientRequestMatcher
+from app.patient_request_service import PatientRequestService
+from app.patient_requests_reader import PatientRequestsReader
 from app.saturday_roster_reader import SaturdayRosterReader
 from app.saturday_roster_service import SaturdayRosterService
 from app.staff_directory_reader import StaffDirectoryReader
@@ -41,6 +44,7 @@ from app.validators.saturday_roster_calendar_integrity import (
     SaturdayRosterCalendarIntegrityValidator,
 )
 from app.validators.endoscopy_assignment import EndoscopyAssignmentValidator
+from app.validators.patient_request import PatientRequestValidator
 
 
 def main():
@@ -159,6 +163,11 @@ def main():
         staff_identity_service,
     )
 
+    patient_request_service = PatientRequestService(
+        PatientRequestsReader(calendar_client),
+        staff_identity_service,
+    )
+
     # ------------------------------------------------------------------
     # Validators
     # ------------------------------------------------------------------
@@ -207,6 +216,8 @@ def main():
         staff_identity_service,
     )
 
+    patient_request_validator = PatientRequestValidator()
+
     # ------------------------------------------------------------------
     # Run validations
     # ------------------------------------------------------------------
@@ -236,6 +247,17 @@ def main():
 
     surgeon_incompatibility_result = (
         surgeon_incompatibility_validator.validate(cases)
+    )
+
+    patient_requests = patient_request_service.get_requests_for_date(
+        schedule_date
+    )
+    patient_request_matches = PatientRequestMatcher().match(
+        patient_requests,
+        cases,
+    )
+    patient_request_result = patient_request_validator.validate(
+        patient_request_matches
     )
 
     saturday_assignments_outside_roster_result = None
@@ -338,6 +360,11 @@ def main():
         pediatrics_result.issue_count,
     )
 
+    report.field(
+        patient_request_result.name,
+        patient_request_result.issue_count,
+    )
+
     if saturday_roster_calendar_integrity_result is not None:
         report.field(
             saturday_roster_calendar_integrity_result.name,
@@ -436,6 +463,10 @@ def main():
             report.line(str(current))
             report.line(str(next_case))
             report.blank()
+
+    report.patient_request_violations(
+        patient_request_result.issues
+    )
 
     print(report.render())
 

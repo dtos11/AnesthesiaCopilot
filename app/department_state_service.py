@@ -132,9 +132,19 @@ class DepartmentStateService:
             }
 
         return {
-            person: schedule[weekday]
+            person: self._without_weekly_ob(schedule[weekday])
             for person, schedule in self.availability_service.weekly.items()
         }
+
+    @staticmethod
+    def _without_weekly_ob(availability):
+        if (
+            isinstance(availability, str)
+            and availability.strip().casefold() == "ob"
+        ):
+            return None
+
+        return availability
 
     @staticmethod
     def _call_assignments(

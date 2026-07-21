@@ -157,6 +157,13 @@ class WebBackend:
 
     def department_state_for(self, day: date) -> DepartmentStateView:
         state = self.department_state_service.get_state_for_date(day)
+
+        if day.weekday() == 5:
+            return DepartmentStateView(
+                state=state,
+                staff_states=state.staff_states,
+            )
+
         order = {
             person: index
             for index, person in enumerate(self.availability_service.weekly)

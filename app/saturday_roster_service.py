@@ -10,6 +10,18 @@ from app.staff_warning import unresolved_staff_message
 
 class SaturdayRosterService:
 
+    OPERATIONAL_SLOT_LABELS = {
+        "Q1": "Q1L",
+        "Q2": "Q2L",
+        "Q3": "Q3C",
+        "Q4": "Q4L",
+        "Q5": "Q5C",
+        "Q6": "Q6L",
+        "Q7": "Q7L",
+        "E": "E",
+    }
+    OPERATIONAL_SLOT_ORDER = tuple(OPERATIONAL_SLOT_LABELS.values())
+
     def __init__(
         self,
         saturday_roster_reader: SaturdayRosterReader,
@@ -58,11 +70,24 @@ class SaturdayRosterService:
             canonical_entries.append(
                 SaturdayRosterEntry(
                     date=entry.date,
-                    slot=entry.slot,
+                    slot=self.OPERATIONAL_SLOT_LABELS.get(
+                        entry.slot,
+                        entry.slot,
+                    ),
                     person=identity.his_full_name,
                 )
             )
 
+        slot_order = {
+            slot: index
+            for index, slot in enumerate(self.OPERATIONAL_SLOT_ORDER)
+        }
+        canonical_entries.sort(
+            key=lambda item: slot_order.get(
+                item.slot,
+                len(slot_order),
+            )
+        )
         return canonical_entries
 
     def _warn_unknown(self, raw_name: str) -> None:

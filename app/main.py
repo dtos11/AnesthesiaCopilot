@@ -322,6 +322,7 @@ def main():
     report.department_state(
         department_state.staff_states,
         list(availability_service.weekly),
+        department_state.date,
     )
 
     report.heading("VALIDATION SUMMARY")

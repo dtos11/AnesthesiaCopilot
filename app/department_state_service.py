@@ -121,7 +121,54 @@ class DepartmentStateService:
                 )
             )
 
+        if day.weekday() == 5:
+            self._order_saturday_states(
+                states,
+                availability,
+                obstetrics_people,
+                overrides_by_person,
+            )
+
         return states
+
+    def _order_saturday_states(
+        self,
+        states: list[StaffState],
+        base_availability: dict,
+        obstetrics_people: set[str],
+        overrides_by_person: dict,
+    ) -> None:
+        slot_order = {
+            slot: index
+            for index, slot in enumerate(
+                self.saturday_roster_service.OPERATIONAL_SLOT_ORDER
+            )
+        }
+        weekly_order = {
+            person: index
+            for index, person in enumerate(self.availability_service.weekly)
+        }
+
+        def order_key(staff_state: StaffState):
+            person = staff_state.person
+
+            if staff_state.availability == "OFF":
+                return 3, weekly_order.get(person, len(weekly_order))
+
+            if person in obstetrics_people:
+                return 1, 0
+
+            base_slot = base_availability.get(person)
+
+            if base_slot in slot_order:
+                return 0, slot_order[base_slot]
+
+            if person in overrides_by_person:
+                return 2, weekly_order.get(person, len(weekly_order))
+
+            return 3, weekly_order.get(person, len(weekly_order))
+
+        states.sort(key=order_key)
 
     def _baseline_availability(self, day: date) -> dict:
         if day.weekday() == 5:

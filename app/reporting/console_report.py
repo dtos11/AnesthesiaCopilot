@@ -89,22 +89,25 @@ class ConsoleReport:
 
             self.blank()
 
-    def department_state(self, staff_states, weekly_order) -> None:
+    def department_state(self, staff_states, weekly_order, day) -> None:
         self.heading("DEPARTMENT STATE")
 
-        order_by_person = {
-            person: index
-            for index, person in enumerate(weekly_order)
-        }
-        ordered_states = sorted(
-            enumerate(staff_states),
-            key=lambda item: (
-                order_by_person.get(
-                    item[1].person,
-                    len(order_by_person) + item[0],
-                )
-            ),
-        )
+        if day.weekday() == 5:
+            ordered_states = enumerate(staff_states)
+        else:
+            order_by_person = {
+                person: index
+                for index, person in enumerate(weekly_order)
+            }
+            ordered_states = sorted(
+                enumerate(staff_states),
+                key=lambda item: (
+                    order_by_person.get(
+                        item[1].person,
+                        len(order_by_person) + item[0],
+                    )
+                ),
+            )
 
         for _, staff_state in ordered_states:
             availability = staff_state.availability

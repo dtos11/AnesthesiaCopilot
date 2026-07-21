@@ -89,7 +89,13 @@ class ConsoleReport:
 
             self.blank()
 
-    def department_state(self, staff_states, weekly_order, day) -> None:
+    def department_state(
+        self,
+        staff_states,
+        weekly_order,
+        day,
+        saturday_conflicts,
+    ) -> None:
         self.heading("DEPARTMENT STATE")
 
         if day.weekday() == 5:
@@ -122,6 +128,17 @@ class ConsoleReport:
             )
 
         self.blank()
+
+        if saturday_conflicts:
+            self.heading("CONFLICTOS DE PROGRAMACIÓN")
+
+            for conflict in saturday_conflicts:
+                self.line(
+                    f"{conflict.slot} → {conflict.staff} "
+                    f"({conflict.final_state})"
+                )
+
+            self.blank()
 
     def saturday_roster_calendar_integrity(self, result) -> None:
         self.heading("SATURDAY ROSTER CALENDAR INTEGRITY")

@@ -8,6 +8,8 @@ from app.models.availability_override import AvailabilityOverride
 from app.models.call_assignment import CallAssignment
 from app.models.department_state import DepartmentState
 from app.models.obstetrics_assignment import ObstetricsAssignment
+from app.models.saturday_conflict import SaturdayConflict
+from app.models.saturday_roster_entry import SaturdayRosterEntry
 from app.models.staff_state import StaffState
 from app.patient_request_service import PatientRequestService
 from app.saturday_roster_service import SaturdayRosterService
@@ -54,6 +56,18 @@ class DepartmentStateService:
         patient_requests = (
             self.patient_request_service.get_requests_for_date(day)
         )
+        saturday_roster = (
+            self.saturday_roster_service.get_entries_for_date(day)
+            if day.weekday() == 5
+            else []
+        )
+        staff_states = self._staff_states(
+            day,
+            vacations,
+            on_call,
+            overrides,
+            saturday_roster,
+        )
 
         return DepartmentState(
             date=day,
@@ -69,15 +83,16 @@ class DepartmentStateService:
             ),
             on_call=on_call,
             postcall=postcall,
-            staff_states=self._staff_states(
-                day,
+            staff_states=staff_states,
+            vacations=vacations,
+            availability_overrides=overrides,
+            patient_requests=patient_requests,
+            saturday_conflicts=self._saturday_conflicts(
+                saturday_roster,
                 vacations,
                 on_call,
                 overrides,
             ),
-            vacations=vacations,
-            availability_overrides=overrides,
-            patient_requests=patient_requests,
         )
 
     def _staff_states(
@@ -86,8 +101,9 @@ class DepartmentStateService:
         vacations,
         on_call: list[ObstetricsAssignment],
         overrides: list[AvailabilityOverride],
+        saturday_roster: list[SaturdayRosterEntry],
     ) -> list[StaffState]:
-        availability = self._baseline_availability(day)
+        availability = self._baseline_availability(day, saturday_roster)
         people = set(availability)
         people.update(vacation.person for vacation in vacations)
         people.update(assignment.person for assignment in on_call)
@@ -131,6 +147,38 @@ class DepartmentStateService:
 
         return states
 
+    @staticmethod
+    def _saturday_conflicts(
+        saturday_roster: list[SaturdayRosterEntry],
+        vacations,
+        on_call: list[ObstetricsAssignment],
+        overrides: list[AvailabilityOverride],
+    ) -> list[SaturdayConflict]:
+        vacation_people = {vacation.person for vacation in vacations}
+        obstetrics_people = {assignment.person for assignment in on_call}
+        override_people = {override.person for override in overrides}
+        conflicts = []
+
+        for entry in saturday_roster:
+            if entry.person in vacation_people:
+                final_state = "Vacaciones"
+            elif entry.person in obstetrics_people:
+                final_state = "OB"
+            elif entry.person in override_people:
+                final_state = "Modificación de disponibilidad"
+            else:
+                continue
+
+            conflicts.append(
+                SaturdayConflict(
+                    slot=entry.slot,
+                    staff=entry.person,
+                    final_state=final_state,
+                )
+            )
+
+        return conflicts
+
     def _order_saturday_states(
         self,
         states: list[StaffState],
@@ -170,16 +218,18 @@ class DepartmentStateService:
 
         states.sort(key=order_key)
 
-    def _baseline_availability(self, day: date) -> dict:
+    def _baseline_availability(
+        self,
+        day: date,
+        saturday_roster: list[SaturdayRosterEntry],
+    ) -> dict:
         if day.weekday() == 5:
             availability = {
                 person: "OFF"
                 for person in self.availability_service.weekly
             }
 
-            for entry in self.saturday_roster_service.get_entries_for_date(
-                day
-            ):
+            for entry in saturday_roster:
                 availability[entry.person] = entry.slot
 
             return availability

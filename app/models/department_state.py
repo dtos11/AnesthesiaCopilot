@@ -4,6 +4,7 @@ from datetime import date
 from app.models.call_assignment import CallAssignment
 from app.models.obstetrics_assignment import ObstetricsAssignment
 from app.models.patient_request import PatientRequest
+from app.models.saturday_conflict import SaturdayConflict
 from app.models.staff_state import StaffState
 from app.models.vacation import Vacation
 from app.models.availability_override import AvailabilityOverride
@@ -22,3 +23,4 @@ class DepartmentState:
     vacations: list[Vacation]
     availability_overrides: list[AvailabilityOverride]
     patient_requests: list[PatientRequest]
+    saturday_conflicts: list[SaturdayConflict]

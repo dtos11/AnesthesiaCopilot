@@ -78,4 +78,15 @@
         </tbody>
     </table>
 </section>
+{% if view.state.saturday_conflicts %}
+<section>
+    <h2>Conflictos de programación</h2>
+    <hr>
+    <ul class="plain-list">
+    {% for conflict in view.state.saturday_conflicts %}
+        <li>{{ conflict.slot }} → {{ conflict.staff }} ({{ conflict.final_state }})</li>
+    {% endfor %}
+    </ul>
+</section>
+{% endif %}
 {% endblock %}

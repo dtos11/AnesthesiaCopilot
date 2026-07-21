@@ -111,6 +111,9 @@ class DepartmentStateService:
             override.person: override
             for override in overrides
         }
+        baseline_includes_vacations = day.strftime("%A") in (
+            self.availability_service.WEEKDAYS
+        )
 
         states = []
 
@@ -118,7 +121,8 @@ class DepartmentStateService:
             effective_availability = availability.get(person)
 
             if person in vacation_people:
-                effective_availability = "OFF"
+                if not baseline_includes_vacations:
+                    effective_availability = "OFF"
             elif person in obstetrics_people:
                 effective_availability = "OB"
             elif person in overrides_by_person:
@@ -240,9 +244,11 @@ class DepartmentStateService:
                 for person in self.availability_service.weekly
             }
 
+        daily_availability = self.availability_service.available_on(day)
+
         return {
-            person: self._without_weekly_ob(schedule[weekday])
-            for person, schedule in self.availability_service.weekly.items()
+            person: self._without_weekly_ob(availability)
+            for person, availability in daily_availability.items()
         }
 
     @staticmethod

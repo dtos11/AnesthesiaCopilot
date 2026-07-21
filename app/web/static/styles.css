@@ -179,12 +179,13 @@ code {
 
 @page {
     size: A4 portrait;
-    margin: 12mm;
+    margin: 10mm;
 }
 
 @media print {
     :root {
         font-size: 10pt;
+        line-height: 1.15;
     }
 
     body,
@@ -200,20 +201,22 @@ code {
     }
 
     .report-header h1 {
-        margin-top: 12px;
-    }
-
-    h2 {
-        margin-top: 20px;
-    }
-
-    h3 {
-        margin-top: 14px;
+        margin-top: 8px;
         margin-bottom: 6px;
     }
 
+    h2 {
+        margin-top: 14px;
+        margin-bottom: 4px;
+    }
+
+    h3 {
+        margin-top: 10px;
+        margin-bottom: 4px;
+    }
+
     section {
-        margin-top: 20px;
+        margin-top: 14px;
         break-inside: avoid;
         page-break-inside: avoid;
     }
@@ -225,12 +228,11 @@ code {
     }
 
     hr {
-        margin: 6px 0 12px;
+        margin: 3px 0 6px;
     }
 
     td {
-        padding-top: 3px;
-        padding-bottom: 3px;
+        padding: 1px 10px 1px 0;
     }
 
     tr,

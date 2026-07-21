@@ -2,6 +2,7 @@ import os
 from datetime import datetime
 
 from google.oauth2.credentials import Credentials
+from google.auth.exceptions import RefreshError
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
@@ -28,9 +29,17 @@ class GoogleCalendarClient:
         if not creds or not creds.valid:
 
             if creds and creds.expired and creds.refresh_token:
-                creds.refresh(Request())
+                try:
+                    creds.refresh(Request())
+                except RefreshError:
+                    print(
+                        "Cached Google credentials are no longer valid."
+                    )
+                    print("Starting a new authentication flow...")
+                    os.remove("token.json")
+                    creds = None
 
-            else:
+            if not creds or not creds.valid:
                 flow = InstalledAppFlow.from_client_secrets_file(
                     "credentials.json",
                     SCOPES,

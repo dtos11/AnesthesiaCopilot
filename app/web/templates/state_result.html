@@ -68,10 +68,12 @@
     <table>
         <tbody>
         {% for staff_state in view.staff_states %}
+            {% if view.state.date.weekday() != 5 or staff_state.availability != 'OFF' %}
             <tr>
                 <td>{{ staff_state.person }}</td>
                 <td>{% if staff_state.availability is iterable and staff_state.availability is not string %}{{ staff_state.availability | join(' / ') }}{% elif staff_state.availability is none %}None{% else %}{{ staff_state.availability }}{% endif %}</td>
             </tr>
+            {% endif %}
         {% endfor %}
         </tbody>
     </table>

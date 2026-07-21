@@ -143,6 +143,18 @@ dd {
     margin-bottom: 28px;
 }
 
+.report-header p {
+    margin-bottom: 4px;
+}
+
+.report-header h1 {
+    margin-top: 24px;
+}
+
+.print-controls {
+    margin-top: 32px;
+}
+
 code {
     color: inherit;
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -162,5 +174,62 @@ code {
 
     dl {
         grid-template-columns: 1fr;
+    }
+}
+
+@page {
+    size: A4 portrait;
+    margin: 12mm;
+}
+
+@media print {
+    :root {
+        font-size: 10pt;
+    }
+
+    body,
+    main {
+        width: 100%;
+        margin: 0;
+    }
+
+    .print-controls,
+    nav,
+    button {
+        display: none !important;
+    }
+
+    .report-header h1 {
+        margin-top: 12px;
+    }
+
+    h2 {
+        margin-top: 20px;
+    }
+
+    h3 {
+        margin-top: 14px;
+        margin-bottom: 6px;
+    }
+
+    section {
+        margin-top: 20px;
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+    hr {
+        margin: 6px 0 12px;
+    }
+
+    td {
+        padding-top: 3px;
+        padding-bottom: 3px;
+    }
+
+    tr,
+    .override {
+        break-inside: avoid;
+        page-break-inside: avoid;
     }
 }

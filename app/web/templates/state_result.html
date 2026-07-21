@@ -4,8 +4,16 @@
     {% if items %}{{ items | map(attribute='person') | join(', ') }}{% else %}{{ empty }}{% endif %}
 {%- endmacro %}
 {% block content %}
-<h1>Estado del servicio</h1>
-<p>{{ view.state.date.strftime('%d/%m/%Y') }}</p>
+<header class="report-header">
+    <p>Hospital Británico</p>
+    <p>AnesthesiaCopilot</p>
+    <h1>Estado del servicio</h1>
+    <p>{{ view.state.date.strftime('%d/%m/%Y') }}</p>
+</header>
+
+<div class="print-controls">
+    <button type="button" onclick="window.print()">Imprimir</button>
+</div>
 
 <section>
     <h2>Guardias</h2>

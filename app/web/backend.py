@@ -40,6 +40,9 @@ from app.validators.saturday_roster_calendar_integrity import (
     SaturdayRosterCalendarIntegrityValidator,
 )
 from app.validators.surgeon_incompatibility import SurgeonIncompatibilityValidator
+from app.validators.unassigned_available_staff import (
+    UnassignedAvailableStaffValidator,
+)
 from app.validators.vte_lopez_privilege import VteLopezPrivilegeValidator
 from app.workbook_reader import WorkbookReader
 
@@ -66,6 +69,7 @@ class ValidationView:
     vte_lopez: object
     pediatrics: object
     patient_requests: object
+    unassigned_available_staff: object
     saturday_calendar_integrity: object | None
     endoscopy_assignment: object | None
     saturday_outside_roster: object | None
@@ -139,6 +143,9 @@ class WebBackend:
             privilege_service
         )
         self.patient_request_validator = PatientRequestValidator()
+        self.unassigned_available_staff_validator = (
+            UnassignedAvailableStaffValidator()
+        )
         self.saturday_integrity_validator = (
             SaturdayRosterCalendarIntegrityValidator(
                 self.saturday_roster_service
@@ -244,6 +251,12 @@ class WebBackend:
             pediatrics=self.pediatrics_validator.validate(cases),
             patient_requests=self.patient_request_validator.validate(
                 patient_matches
+            ),
+            unassigned_available_staff=(
+                self.unassigned_available_staff_validator.validate(
+                    cases,
+                    department_state,
+                )
             ),
             saturday_calendar_integrity=saturday_integrity,
             endoscopy_assignment=endoscopy_assignment,

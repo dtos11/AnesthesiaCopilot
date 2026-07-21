@@ -1,10 +1,11 @@
 """Print canonical patient requests returned by PatientRequestService.
 
-Run from the repository root, optionally supplying an ISO date:
+Run from the repository root with an ISO date:
 
     .venv/bin/python tools/print_patient_request_service.py 2026-07-20
 """
 
+import argparse
 from datetime import date
 from pathlib import Path
 import sys
@@ -21,7 +22,10 @@ from app.staff_identity_service import StaffIdentityService  # noqa: E402
 
 
 def main() -> None:
-    day = date.fromisoformat(sys.argv[1]) if len(sys.argv) > 1 else date.today()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("schedule_date", type=date.fromisoformat)
+    arguments = parser.parse_args()
+    day = arguments.schedule_date
     identity_service = StaffIdentityService(
         StaffDirectoryReader(
             REPOSITORY_ROOT / "sample_data/department_staff.xlsx"

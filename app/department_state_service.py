@@ -48,11 +48,7 @@ class DepartmentStateService:
         overrides = (
             self.availability_override_service.get_overrides_for_date(day)
         )
-        vacations = [
-            vacation
-            for vacation in self.availability_service.vacations
-            if vacation.includes(day)
-        ]
+        vacations = self.availability_service.vacations_for(day)
         patient_requests = (
             self.patient_request_service.get_requests_for_date(day)
         )

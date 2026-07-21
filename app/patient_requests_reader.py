@@ -1,5 +1,4 @@
-from datetime import date, datetime, time, timezone
-from typing import Optional
+from datetime import date, datetime, time, timedelta, timezone
 
 from app.calendar.google_calendar_client import GoogleCalendarClient
 from app.models.patient_request import PatientRequest
@@ -15,34 +14,20 @@ class PatientRequestsReader:
     def __init__(
         self,
         calendar: GoogleCalendarClient,
-        earliest_date: Optional[date] = None,
     ):
         self.calendar = calendar
-        self.earliest_date = earliest_date
 
-    def read(
-        self,
-        start_date: Optional[date] = None,
-        end_date: Optional[date] = None,
-    ) -> list[PatientRequest]:
-        if start_date is None:
-            start_date = self.earliest_date
-
-        time_min = None
-        if start_date is not None:
-            time_min = datetime.combine(
-                start_date,
-                time.min,
-                tzinfo=timezone.utc,
-            )
-
-        time_max = None
-        if end_date is not None:
-            time_max = datetime.combine(
-                end_date,
-                time.max,
-                tzinfo=timezone.utc,
-            )
+    def read(self, schedule_date: date) -> list[PatientRequest]:
+        time_min = datetime.combine(
+            schedule_date,
+            time.min,
+            tzinfo=timezone.utc,
+        )
+        time_max = datetime.combine(
+            schedule_date + timedelta(days=1),
+            time.min,
+            tzinfo=timezone.utc,
+        )
 
         events = self.calendar.list_events(
             self.CALENDAR_ID,
@@ -59,10 +44,7 @@ class PatientRequestsReader:
 
             request_date = date.fromisoformat(start["date"])
 
-            if start_date is not None and request_date < start_date:
-                continue
-
-            if end_date is not None and request_date > end_date:
+            if request_date != schedule_date:
                 continue
 
             title = (event.get("summary") or "").strip()

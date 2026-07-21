@@ -1,20 +1,14 @@
-from datetime import date, timedelta
+from datetime import date
 
 from app.calendar.google_calendar_client import GoogleCalendarClient
 from app.guardias_reader import GuardiasReader
 
-CALENDAR_ID = "7i6h1n0bmkmatdiphu1hv98n40@group.calendar.google.com"
-
 client = GoogleCalendarClient()
 reader = GuardiasReader(client)
 
-today = date.today()
+schedule_date = date(2026, 7, 21)
 
-assignments = reader.read(
-    CALENDAR_ID,
-    start_date=today,
-    end_date=today + timedelta(days=7),
-)
+assignments = reader.read(schedule_date)
 
 print(f"Found {len(assignments)} assignments\n")
 

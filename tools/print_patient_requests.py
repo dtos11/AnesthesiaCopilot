@@ -2,9 +2,11 @@
 
 Run from the repository root with:
 
-    .venv/bin/python tools/print_patient_requests.py
+    .venv/bin/python tools/print_patient_requests.py 2026-07-20
 """
 
+import argparse
+from datetime import date
 from pathlib import Path
 import sys
 
@@ -17,8 +19,11 @@ from app.patient_requests_reader import PatientRequestsReader  # noqa: E402
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("schedule_date", type=date.fromisoformat)
+    arguments = parser.parse_args()
     reader = PatientRequestsReader(GoogleCalendarClient())
-    requests = reader.read()
+    requests = reader.read(arguments.schedule_date)
 
     print(f"Found {len(requests)} patient request(s)\n")
 

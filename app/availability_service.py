@@ -26,15 +26,16 @@ class AvailabilityService:
         staff_identity_service: StaffIdentityService,
     ):
         self.availability_reader = availability_reader
+        self.vacations_reader = vacations_reader
         self.staff_identity_service = staff_identity_service
         self._warned_unknowns = set()
+        self._vacations_by_date: dict[date, list[Vacation]] = {}
         self.weekly = self._load_weekly_availability()
-        self.vacations = self._load_vacations(vacations_reader)
 
     def available_on(self, day: date):
 
         weekly = self.weekly
-        vacations = self.vacations
+        vacations = self.vacations_for(day)
 
         weekday = self.WEEKDAYS[day.strftime("%A")]
 
@@ -82,10 +83,16 @@ class AvailabilityService:
 
         return weekly
 
-    def _load_vacations(self, vacations_reader: VacationsReader):
+    def vacations_for(self, day: date) -> list[Vacation]:
+        if day not in self._vacations_by_date:
+            self._vacations_by_date[day] = self._load_vacations(day)
+
+        return self._vacations_by_date[day]
+
+    def _load_vacations(self, day: date):
         vacations = []
 
-        for vacation in vacations_reader.read():
+        for vacation in self.vacations_reader.read(day):
             parsed_vacation = self._parse_vacation(vacation)
 
             if parsed_vacation is None:

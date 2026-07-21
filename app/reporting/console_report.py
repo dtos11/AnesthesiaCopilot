@@ -211,6 +211,23 @@ class ConsoleReport:
             )
             self.blank()
 
+    def unassigned_available_staff(self, staff_states) -> None:
+        if not staff_states:
+            return
+
+        self.line("ANESTESIÓLOGOS SIN ASIGNACIÓN")
+        self.separator()
+
+        for staff_state in staff_states:
+            availability = staff_state.availability
+
+            if isinstance(availability, list):
+                availability = " / ".join(availability)
+
+            self.line(f"{staff_state.person:<32}{availability}")
+
+        self.blank()
+
     def line(self, text: str = "") -> None:
         self._lines.append(text)
 

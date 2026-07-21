@@ -35,10 +35,7 @@ class SaturdayRosterService:
         self,
         day: date,
     ) -> list[SaturdayRosterEntry]:
-        entries = self.saturday_roster_reader.read(
-            start_date=day,
-            end_date=day,
-        )
+        entries = self.saturday_roster_reader.read(day)
         return self._resolve_entries(entries)
 
     def get_entries_for_slot(

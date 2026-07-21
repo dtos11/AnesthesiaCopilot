@@ -20,10 +20,7 @@ class PatientRequestService:
         self._warned_unknowns = set()
 
     def get_requests_for_date(self, day: date) -> list[PatientRequest]:
-        requests = self.patient_requests_reader.read(
-            start_date=day,
-            end_date=day,
-        )
+        requests = self.patient_requests_reader.read(day)
         return self._resolve_requests(requests)
 
     def _resolve_requests(

@@ -20,10 +20,7 @@ class GuardiasService:
         self._warned_unknowns = set()
 
     def get_assignments_for_date(self, day: date) -> list[CallAssignment]:
-        assignments = self.guardias_reader.read(
-            start_date=day,
-            end_date=day,
-        )
+        assignments = self.guardias_reader.read(day)
         return self._resolve_assignments(assignments)
 
     def _resolve_assignments(

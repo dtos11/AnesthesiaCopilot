@@ -48,6 +48,9 @@ from app.validators.saturday_roster_calendar_integrity import (
 )
 from app.validators.endoscopy_assignment import EndoscopyAssignmentValidator
 from app.validators.patient_request import PatientRequestValidator
+from app.validators.unassigned_available_staff import (
+    UnassignedAvailableStaffValidator,
+)
 
 
 def main():
@@ -219,6 +222,10 @@ def main():
 
     patient_request_validator = PatientRequestValidator()
 
+    unassigned_available_staff_validator = (
+        UnassignedAvailableStaffValidator()
+    )
+
     # ------------------------------------------------------------------
     # Run validations
     # ------------------------------------------------------------------
@@ -256,6 +263,12 @@ def main():
     )
     patient_request_result = patient_request_validator.validate(
         patient_request_matches
+    )
+    unassigned_available_staff_result = (
+        unassigned_available_staff_validator.validate(
+            cases,
+            department_state,
+        )
     )
 
     saturday_assignments_outside_roster_result = None
@@ -374,6 +387,11 @@ def main():
         patient_request_result.issue_count,
     )
 
+    report.field(
+        unassigned_available_staff_result.name,
+        unassigned_available_staff_result.issue_count,
+    )
+
     if saturday_roster_calendar_integrity_result is not None:
         report.field(
             saturday_roster_calendar_integrity_result.name,
@@ -475,6 +493,10 @@ def main():
 
     report.patient_request_violations(
         patient_request_result.issues
+    )
+
+    report.unassigned_available_staff(
+        unassigned_available_staff_result.issues
     )
 
     print(report.render())

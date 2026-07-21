@@ -1,6 +1,6 @@
 import re
 import warnings
-from datetime import date, datetime, time, timezone
+from datetime import date, datetime, time, timedelta, timezone
 
 from app.calendar.google_calendar_client import GoogleCalendarClient
 from app.models.obstetrics_assignment import ObstetricsAssignment
@@ -35,8 +35,8 @@ class MaternidadReader:
             tzinfo=timezone.utc,
         )
         time_max = datetime.combine(
-            day,
-            time.max,
+            day + timedelta(days=1),
+            time.min,
             tzinfo=timezone.utc,
         )
 

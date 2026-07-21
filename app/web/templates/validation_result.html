@@ -21,6 +21,7 @@
             <tr><td>Privilegios VTE López</td><td>{{ view.vte_lopez.issue_count }}</td></tr>
             <tr><td>Privilegios Pediatría</td><td>{{ view.pediatrics.issue_count }}</td></tr>
             <tr><td>Solicitudes de pacientes</td><td>{{ view.patient_requests.issue_count }}</td></tr>
+            <tr><td>Anestesiólogos sin asignación</td><td>{{ view.unassigned_available_staff.issue_count }}</td></tr>
         </tbody>
     </table>
 </section>
@@ -35,6 +36,20 @@
     {% if view.incompatibilities.issue_count %}<h3>Incompatibilidades con cirujano</h3><ul class="issues">{{ case_lines(view.incompatibilities) }}</ul>{% endif %}
     {% if view.vte_lopez.issue_count %}<h3>Privilegios VTE López</h3><ul class="issues">{{ case_lines(view.vte_lopez) }}</ul>{% endif %}
     {% if view.pediatrics.issue_count %}<h3>Privilegios Pediatría</h3><ul class="issues">{{ case_lines(view.pediatrics) }}</ul>{% endif %}
+
+    {% if view.unassigned_available_staff.issue_count %}
+        <h3>Anestesiólogos sin asignación</h3>
+        <table>
+            <tbody>
+            {% for staff_state in view.unassigned_available_staff.issues %}
+                <tr>
+                    <td>{{ staff_state.person }}</td>
+                    <td>{% if staff_state.availability is iterable and staff_state.availability is not string %}{{ staff_state.availability | join(' / ') }}{% else %}{{ staff_state.availability }}{% endif %}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
 
     {% if view.double_booking.issue_count %}
         <h3>Doble asignación</h3>
@@ -86,6 +101,6 @@
         {% endfor %}
     {% endif %}
 
-    {% if not (view.missing.issue_count or (view.assigned_while_off and view.assigned_while_off.issue_count) or view.assigned_while_ob_call.issue_count or view.double_booking.issue_count or view.incompatibilities.issue_count or view.vte_lopez.issue_count or view.pediatrics.issue_count or view.patient_requests.issue_count or (view.saturday_calendar_integrity and view.saturday_calendar_integrity.issue_count) or (view.endoscopy_assignment and view.endoscopy_assignment.issue_count) or (view.saturday_outside_roster and view.saturday_outside_roster.issue_count)) %}<p>Ninguna</p>{% endif %}
+    {% if not (view.missing.issue_count or (view.assigned_while_off and view.assigned_while_off.issue_count) or view.assigned_while_ob_call.issue_count or view.double_booking.issue_count or view.incompatibilities.issue_count or view.vte_lopez.issue_count or view.pediatrics.issue_count or view.patient_requests.issue_count or view.unassigned_available_staff.issue_count or (view.saturday_calendar_integrity and view.saturday_calendar_integrity.issue_count) or (view.endoscopy_assignment and view.endoscopy_assignment.issue_count) or (view.saturday_outside_roster and view.saturday_outside_roster.issue_count)) %}<p>Ninguna</p>{% endif %}
 </section>
 {% endblock %}

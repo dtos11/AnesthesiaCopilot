@@ -23,10 +23,7 @@ class AvailabilityOverrideService:
         self,
         day: date,
     ) -> list[AvailabilityOverride]:
-        overrides = self.availability_overrides_reader.read(
-            start_date=day,
-            end_date=day,
-        )
+        overrides = self.availability_overrides_reader.read(day)
         return self._resolve_overrides(overrides)
 
     def _resolve_overrides(

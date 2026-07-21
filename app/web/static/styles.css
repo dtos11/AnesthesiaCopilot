@@ -218,6 +218,12 @@ code {
         page-break-inside: avoid;
     }
 
+    .report-header ~ section:last-of-type {
+        margin-top: 0;
+        break-before: page;
+        page-break-before: always;
+    }
+
     hr {
         margin: 6px 0 12px;
     }

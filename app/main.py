@@ -162,6 +162,7 @@ def main():
         maternidad_service,
         availability_override_service,
         patient_request_service,
+        saturday_roster_service,
     )
 
     department_state = department_state_service.get_state_for_date(

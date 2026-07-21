@@ -101,12 +101,17 @@ class WebBackend:
             PatientRequestsReader(self.calendar_client),
             self.staff_identity_service,
         )
+        self.saturday_roster_service = SaturdayRosterService(
+            SaturdayRosterReader(self.calendar_client),
+            self.staff_identity_service,
+        )
         self.department_state_service = DepartmentStateService(
             self.availability_service,
             self.guardias_service,
             self.maternidad_service,
             self.availability_override_service,
             self.patient_request_service,
+            self.saturday_roster_service,
         )
         privilege_service = PrivilegeService(
             PrivilegeReader(SAMPLE_DATA / "privilegios.xlsx"),
@@ -114,10 +119,6 @@ class WebBackend:
         )
         incompatibility_service = IncompatibilityService(
             IncompatibilityReader(SAMPLE_DATA / "privilegios.xlsx"),
-            self.staff_identity_service,
-        )
-        self.saturday_roster_service = SaturdayRosterService(
-            SaturdayRosterReader(self.calendar_client),
             self.staff_identity_service,
         )
         self.missing_validator = MissingAnesthesiologistValidator()

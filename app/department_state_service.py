@@ -10,6 +10,7 @@ from app.models.department_state import DepartmentState
 from app.models.obstetrics_assignment import ObstetricsAssignment
 from app.models.staff_state import StaffState
 from app.patient_request_service import PatientRequestService
+from app.saturday_roster_service import SaturdayRosterService
 
 
 class DepartmentStateService:
@@ -21,12 +22,14 @@ class DepartmentStateService:
         maternidad_service: MaternidadService,
         availability_override_service: AvailabilityOverrideService,
         patient_request_service: PatientRequestService,
+        saturday_roster_service: SaturdayRosterService,
     ):
         self.availability_service = availability_service
         self.guardias_service = guardias_service
         self.maternidad_service = maternidad_service
         self.availability_override_service = availability_override_service
         self.patient_request_service = patient_request_service
+        self.saturday_roster_service = saturday_roster_service
 
     def get_state_for_date(self, day: date) -> DepartmentState:
         previous_day = day - timedelta(days=1)
@@ -121,6 +124,19 @@ class DepartmentStateService:
         return states
 
     def _baseline_availability(self, day: date) -> dict:
+        if day.weekday() == 5:
+            availability = {
+                person: "OFF"
+                for person in self.availability_service.weekly
+            }
+
+            for entry in self.saturday_roster_service.get_entries_for_date(
+                day
+            ):
+                availability[entry.person] = entry.slot
+
+            return availability
+
         weekday = self.availability_service.WEEKDAYS.get(
             day.strftime("%A")
         )

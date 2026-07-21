@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Estado del servicio · AnesthesiaCopilot{% endblock %}
+{% macro names(items, empty='Ninguna') -%}
+    {% if items %}{{ items | map(attribute='person') | join(', ') }}{% else %}{{ empty }}{% endif %}
+{%- endmacro %}
+{% block content %}
+<h1>Estado del servicio</h1>
+<p>{{ view.state.date.strftime('%d/%m/%Y') }}</p>
+
+<section>
+    <h2>Guardias</h2>
+    <hr>
+    <h3>Postguardia</h3>
+    <dl>
+        <dt>Primer llamado</dt><dd>{{ names(view.state.first_postcall, '<faltante>') }}</dd>
+        <dt>Segundo llamado</dt><dd>{{ names(view.state.second_postcall, '<faltante>') }}</dd>
+    </dl>
+    <h3>Guardia del día</h3>
+    <dl>
+        <dt>Primer llamado</dt><dd>{{ names(view.state.first_call, '<faltante>') }}</dd>
+        <dt>Segundo llamado</dt><dd>{{ names(view.state.second_call, '<faltante>') }}</dd>
+    </dl>
+</section>
+
+<section>
+    <h2>Maternidad</h2>
+    <hr>
+    <dl>
+        <dt>Postguardia</dt><dd>{{ names(view.state.postcall) }}</dd>
+        <dt>Guardia del día</dt><dd>{{ names(view.state.on_call) }}</dd>
+    </dl>
+</section>
+
+<section>
+    <h2>Vacaciones</h2>
+    <hr>
+    {% if view.state.vacations %}
+        <ul class="plain-list">
+        {% for vacation in view.state.vacations %}<li>{{ vacation.person }}</li>{% endfor %}
+        </ul>
+    {% else %}<p>Ninguna</p>{% endif %}
+</section>
+
+<section>
+    <h2>Modificaciones de disponibilidad</h2>
+    <hr>
+    {% if view.state.availability_overrides %}
+        {% for override in view.state.availability_overrides %}
+        <div class="override">
+            <p>{{ override.person }}</p>
+            {% for instruction in override.instructions %}<p class="indented">{{ instruction }}</p>{% endfor %}
+        </div>
+        {% endfor %}
+    {% else %}<p>Ninguna</p>{% endif %}
+</section>
+
+<section>
+    <h2>Estado del servicio</h2>
+    <hr>
+    <table>
+        <tbody>
+        {% for staff_state in view.staff_states %}
+            <tr>
+                <td>{{ staff_state.person }}</td>
+                <td>{% if staff_state.availability is iterable and staff_state.availability is not string %}{{ staff_state.availability | join(' / ') }}{% elif staff_state.availability is none %}None{% else %}{{ staff_state.availability }}{% endif %}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</section>
+{% endblock %}

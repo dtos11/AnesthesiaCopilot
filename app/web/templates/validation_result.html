@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}Validación · AnesthesiaCopilot{% endblock %}
+{% macro case_lines(result) -%}
+    {% for case in result.issues %}<li><code>{{ case }}</code></li>{% endfor %}
+{%- endmacro %}
+{% block content %}
+<h1>Validar programación</h1>
+<p>{{ view.date.strftime('%d/%m/%Y') }}</p>
+
+<section>
+    <h2>Resumen de validación</h2>
+    <hr>
+    <table>
+        <tbody>
+            <tr><td>Procedimientos programados</td><td>{{ view.cases | length }}</td></tr>
+            <tr><td>Sin anestesiólogo</td><td>{{ view.missing.issue_count }}</td></tr>
+            <tr><td>Asignados estando OFF</td><td>{% if view.assigned_while_off %}{{ view.assigned_while_off.issue_count }}{% else %}—{% endif %}</td></tr>
+            <tr><td>Asignados en maternidad</td><td>{{ view.assigned_while_ob_call.issue_count }}</td></tr>
+            <tr><td>Doble asignación</td><td>{{ view.double_booking.issue_count }}</td></tr>
+            <tr><td>Incompatibilidades con cirujano</td><td>{{ view.incompatibilities.issue_count }}</td></tr>
+            <tr><td>Privilegios VTE López</td><td>{{ view.vte_lopez.issue_count }}</td></tr>
+            <tr><td>Privilegios Pediatría</td><td>{{ view.pediatrics.issue_count }}</td></tr>
+            <tr><td>Solicitudes de pacientes</td><td>{{ view.patient_requests.issue_count }}</td></tr>
+        </tbody>
+    </table>
+</section>
+
+<section>
+    <h2>Incidencias</h2>
+    <hr>
+
+    {% if view.missing.issue_count %}<h3>Sin anestesiólogo</h3><ul class="issues">{{ case_lines(view.missing) }}</ul>{% endif %}
+    {% if view.assigned_while_off and view.assigned_while_off.issue_count %}<h3>Asignados estando OFF</h3><ul class="issues">{{ case_lines(view.assigned_while_off) }}</ul>{% endif %}
+    {% if view.assigned_while_ob_call.issue_count %}<h3>Asignados en maternidad</h3><ul class="issues">{{ case_lines(view.assigned_while_ob_call) }}</ul>{% endif %}
+    {% if view.incompatibilities.issue_count %}<h3>Incompatibilidades con cirujano</h3><ul class="issues">{{ case_lines(view.incompatibilities) }}</ul>{% endif %}
+    {% if view.vte_lopez.issue_count %}<h3>Privilegios VTE López</h3><ul class="issues">{{ case_lines(view.vte_lopez) }}</ul>{% endif %}
+    {% if view.pediatrics.issue_count %}<h3>Privilegios Pediatría</h3><ul class="issues">{{ case_lines(view.pediatrics) }}</ul>{% endif %}
+
+    {% if view.double_booking.issue_count %}
+        <h3>Doble asignación</h3>
+        {% for current, next_case in view.double_booking.issues %}
+            <div class="issue-group">
+                <p>DOBLE ASIGNACIÓN: {{ current.anesthesiologist }}</p>
+                <code>{{ current }}</code><br>
+                <code>{{ next_case }}</code>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {% if view.patient_requests.issue_count %}
+        <h3>Solicitudes de pacientes</h3>
+        {% for violation in view.patient_requests.issues %}
+            <dl>
+                <dt>Paciente</dt><dd>{{ violation.match.request.patient }}</dd>
+                <dt>Solicitado</dt><dd>{{ violation.match.request.requested_anesthesiologist }}</dd>
+                <dt>Asignado</dt><dd>{{ violation.match.case.anesthesiologist or '<sin asignar>' }}</dd>
+                <dt>Cirujano</dt><dd>{{ violation.match.request.surgeon }}</dd>
+                <dt>Área</dt><dd>{{ violation.match.case.area }}</dd>
+                <dt>Quirófano</dt><dd>{{ violation.match.case.operating_room }}</dd>
+                <dt>Hora</dt><dd>{{ violation.match.case.scheduled_time.strftime('%H:%M') }}</dd>
+            </dl>
+        {% endfor %}
+    {% endif %}
+
+    {% if view.saturday_calendar_integrity and view.saturday_calendar_integrity.issue_count %}
+        <h3>Integridad del calendario de sábado</h3>
+        <p>Se esperaba exactamente una entrada E; se encontraron {{ view.saturday_calendar_integrity.issues[0] | length }}.</p>
+    {% endif %}
+
+    {% if view.endoscopy_assignment and view.endoscopy_assignment.issue_count %}
+        <h3>Asignación de Endoscopía</h3>
+        <ul class="issues">
+        {% for issue in view.endoscopy_assignment.issues %}<li>{{ issue }}</li>{% endfor %}
+        </ul>
+    {% endif %}
+
+    {% if view.saturday_outside_roster and view.saturday_outside_roster.issue_count %}
+        <h3>Asignaciones de sábado fuera del roster</h3>
+        <p>Personal adicional de sábado que requiere revisión.</p>
+        {% for person, cases in view.saturday_outside_roster.issues %}
+            <div class="issue-group">
+                <p>{{ person }}</p>
+                <p class="indented">Casos: {{ cases | length }}</p>
+                <p class="indented">Áreas: {% for area, area_cases in cases | groupby('area') %}{{ area }} ({{ area_cases | length }}){% if not loop.last %}, {% endif %}{% endfor %}</p>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {% if not (view.missing.issue_count or (view.assigned_while_off and view.assigned_while_off.issue_count) or view.assigned_while_ob_call.issue_count or view.double_booking.issue_count or view.incompatibilities.issue_count or view.vte_lopez.issue_count or view.pediatrics.issue_count or view.patient_requests.issue_count or (view.saturday_calendar_integrity and view.saturday_calendar_integrity.issue_count) or (view.endoscopy_assignment and view.endoscopy_assignment.issue_count) or (view.saturday_outside_roster and view.saturday_outside_roster.issue_count)) %}<p>Ninguna</p>{% endif %}
+</section>
+{% endblock %}

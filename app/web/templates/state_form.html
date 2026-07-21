@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Estado del servicio · AnesthesiaCopilot{% endblock %}
+{% block content %}
+<h1>Estado del servicio</h1>
+<hr>
+<form method="post">
+    <label for="day">Fecha</label>
+    <input id="day" name="day" type="date" value="{{ today }}" required>
+    <button type="submit">Generar estado</button>
+</form>
+{% endblock %}

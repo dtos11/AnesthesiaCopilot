@@ -42,18 +42,12 @@
 <section>
     <h2>Residentes</h2>
     <hr>
-    <h3>De guardia</h3>
-    {% if view.state.resident_on_call %}
-        <ul class="plain-list">
-        {% for resident in view.state.resident_on_call %}<li>{{ resident }}</li>{% endfor %}
-        </ul>
-    {% else %}<p>&lt;faltante&gt;</p>{% endif %}
-    <h3>Vacaciones</h3>
-    {% if view.state.resident_vacations %}
-        <ul class="plain-list">
-        {% for resident in view.state.resident_vacations %}<li>{{ resident }}</li>{% endfor %}
-        </ul>
-    {% else %}<p>Ninguna</p>{% endif %}
+    <dl>
+        <dt>De guardia :</dt>
+        <dd>{% if view.state.resident_on_call %}{% for resident in view.state.resident_on_call %}<div>{{ resident }}</div>{% endfor %}{% else %}&lt;faltante&gt;{% endif %}</dd>
+        <dt>Vacaciones :</dt>
+        <dd>{% if view.state.resident_vacations %}{% for resident in view.state.resident_vacations %}<div>{{ resident }}</div>{% endfor %}{% else %}Ninguna{% endif %}</dd>
+    </dl>
 </section>
 
 <section>
@@ -70,12 +64,12 @@
     <h2>Modificaciones de disponibilidad</h2>
     <hr>
     {% if view.state.availability_overrides %}
+        <dl>
         {% for override in view.state.availability_overrides %}
-        <div class="override">
-            <p>{{ override.person }}</p>
-            {% for instruction in override.instructions %}<p class="indented">{{ instruction }}</p>{% endfor %}
-        </div>
+            <dt>{{ override.person }} :</dt>
+            <dd>{% if override.instructions %}{{ override.instructions | join(', ') }}{% else %}—{% endif %}</dd>
         {% endfor %}
+        </dl>
     {% else %}<p>Ninguna</p>{% endif %}
 </section>
 

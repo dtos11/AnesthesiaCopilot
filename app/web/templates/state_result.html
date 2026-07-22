@@ -40,6 +40,23 @@
 </section>
 
 <section>
+    <h2>Residentes</h2>
+    <hr>
+    <h3>De guardia</h3>
+    {% if view.state.resident_on_call %}
+        <ul class="plain-list">
+        {% for resident in view.state.resident_on_call %}<li>{{ resident }}</li>{% endfor %}
+        </ul>
+    {% else %}<p>&lt;faltante&gt;</p>{% endif %}
+    <h3>Vacaciones</h3>
+    {% if view.state.resident_vacations %}
+        <ul class="plain-list">
+        {% for resident in view.state.resident_vacations %}<li>{{ resident }}</li>{% endfor %}
+        </ul>
+    {% else %}<p>Ninguna</p>{% endif %}
+</section>
+
+<section>
     <h2>Vacaciones</h2>
     <hr>
     {% if view.state.vacations %}

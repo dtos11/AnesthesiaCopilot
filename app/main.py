@@ -20,6 +20,8 @@ from app.maternidad_service import MaternidadService
 from app.patient_request_matcher import PatientRequestMatcher
 from app.patient_request_service import PatientRequestService
 from app.patient_requests_reader import PatientRequestsReader
+from app.resident_calendar_reader import ResidentCalendarReader
+from app.resident_service import ResidentService
 from app.saturday_roster_reader import SaturdayRosterReader
 from app.saturday_roster_service import SaturdayRosterService
 from app.staff_directory_reader import StaffDirectoryReader
@@ -159,6 +161,11 @@ def main():
         staff_identity_service,
     )
 
+    resident_service = ResidentService(
+        ResidentCalendarReader(calendar_client),
+        staff_identity_service,
+    )
+
     department_state_service = DepartmentStateService(
         availability_service,
         guardias_service,
@@ -166,6 +173,7 @@ def main():
         availability_override_service,
         patient_request_service,
         saturday_roster_service,
+        resident_service,
     )
 
     department_state = department_state_service.get_state_for_date(

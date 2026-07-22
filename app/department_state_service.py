@@ -12,6 +12,7 @@ from app.models.saturday_conflict import SaturdayConflict
 from app.models.saturday_roster_entry import SaturdayRosterEntry
 from app.models.staff_state import StaffState
 from app.patient_request_service import PatientRequestService
+from app.resident_service import ResidentService
 from app.saturday_roster_service import SaturdayRosterService
 
 
@@ -25,6 +26,7 @@ class DepartmentStateService:
         availability_override_service: AvailabilityOverrideService,
         patient_request_service: PatientRequestService,
         saturday_roster_service: SaturdayRosterService,
+        resident_service: ResidentService,
     ):
         self.availability_service = availability_service
         self.guardias_service = guardias_service
@@ -32,6 +34,7 @@ class DepartmentStateService:
         self.availability_override_service = availability_override_service
         self.patient_request_service = patient_request_service
         self.saturday_roster_service = saturday_roster_service
+        self.resident_service = resident_service
 
     def get_state_for_date(self, day: date) -> DepartmentState:
         previous_day = day - timedelta(days=1)
@@ -52,6 +55,7 @@ class DepartmentStateService:
         patient_requests = (
             self.patient_request_service.get_requests_for_date(day)
         )
+        resident_state = self.resident_service.get_state_for_date(day)
         saturday_roster = (
             self.saturday_roster_service.get_entries_for_date(day)
             if day.weekday() == 5
@@ -89,6 +93,8 @@ class DepartmentStateService:
                 on_call,
                 overrides,
             ),
+            resident_on_call=resident_state.resident_on_call,
+            resident_vacations=resident_state.resident_vacations,
         )
 
     def _staff_states(

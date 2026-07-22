@@ -24,3 +24,5 @@ class DepartmentState:
     availability_overrides: list[AvailabilityOverride]
     patient_requests: list[PatientRequest]
     saturday_conflicts: list[SaturdayConflict]
+    resident_on_call: tuple[str, ...]
+    resident_vacations: tuple[str, ...]

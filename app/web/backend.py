@@ -21,6 +21,8 @@ from app.patient_request_service import PatientRequestService
 from app.patient_requests_reader import PatientRequestsReader
 from app.privilege_reader import PrivilegeReader
 from app.privilege_service import PrivilegeService
+from app.resident_calendar_reader import ResidentCalendarReader
+from app.resident_service import ResidentService
 from app.saturday_roster_reader import SaturdayRosterReader
 from app.saturday_roster_service import SaturdayRosterService
 from app.schedule_date_inference import infer_schedule_date
@@ -109,6 +111,10 @@ class WebBackend:
             SaturdayRosterReader(self.calendar_client),
             self.staff_identity_service,
         )
+        self.resident_service = ResidentService(
+            ResidentCalendarReader(self.calendar_client),
+            self.staff_identity_service,
+        )
         self.department_state_service = DepartmentStateService(
             self.availability_service,
             self.guardias_service,
@@ -116,6 +122,7 @@ class WebBackend:
             self.availability_override_service,
             self.patient_request_service,
             self.saturday_roster_service,
+            self.resident_service,
         )
         privilege_service = PrivilegeService(
             PrivilegeReader(SAMPLE_DATA / "privilegios.xlsx"),

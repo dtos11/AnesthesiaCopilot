@@ -63,6 +63,18 @@
 </section>
 
 <section>
+    <h2>Pedidos de pacientes</h2>
+    <hr>
+    {% if view.state.patient_requests %}
+        <ul class="plain-list">
+        {% for request in view.state.patient_requests %}
+            <li>{{ request.patient }} → {{ request.requested_anesthesiologist }} ({{ request.surgeon }})</li>
+        {% endfor %}
+        </ul>
+    {% else %}<p>Ninguno</p>{% endif %}
+</section>
+
+<section>
     <h2>Estado del servicio</h2>
     <hr>
     <table>

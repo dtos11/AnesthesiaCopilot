@@ -18,6 +18,9 @@ class PatientRequestMatcher:
         matches = []
 
         for patient_request in requests:
+            if patient_request.surgeon is None:
+                continue
+
             candidate_cases = [
                 case
                 for case in cases

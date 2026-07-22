@@ -57,9 +57,9 @@ class PatientRequestsReader:
             patient = patient.strip()
             surgeon = self._first_non_empty_line(
                 event.get("description") or ""
-            )
+            ) or None
 
-            if not requested_anesthesiologist or not patient or not surgeon:
+            if not requested_anesthesiologist or not patient:
                 continue
 
             requests.append(

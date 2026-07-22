@@ -7,4 +7,4 @@ class PatientRequest:
     date: date
     requested_anesthesiologist: str
     patient: str
-    surgeon: str
+    surgeon: str | None

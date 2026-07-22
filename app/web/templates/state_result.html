@@ -68,7 +68,7 @@
     {% if view.state.patient_requests %}
         <ul class="plain-list">
         {% for request in view.state.patient_requests %}
-            <li>{{ request.patient }} → {{ request.requested_anesthesiologist }} ({{ request.surgeon }})</li>
+            <li>{{ request.patient }} → {{ request.requested_anesthesiologist }} ({% if request.surgeon %}{{ request.surgeon }}{% else %}Cirujano: ?{% endif %})</li>
         {% endfor %}
         </ul>
     {% else %}<p>Ninguno</p>{% endif %}

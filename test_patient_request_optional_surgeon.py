@@ -92,6 +92,30 @@ class PatientRequestOptionalSurgeonTests(unittest.TestCase):
         self.assertEqual(len(matches), 1)
         self.assertEqual(matches[0].confidence, 100.0)
 
+    def test_cases_without_surgeon_are_ignored(self):
+        request = PatientRequest(
+            date=date(2026, 7, 20),
+            requested_anesthesiologist="Mega Diaz Federico Andres",
+            patient="SCAZZARRIELLO",
+            surgeon="Rabino",
+        )
+
+        for missing_surgeon in (None, "", "   "):
+            with self.subTest(surgeon=missing_surgeon):
+                scheduled_case = SimpleNamespace(
+                    date=date(2026, 7, 20),
+                    surgeon=missing_surgeon,
+                    patient="SCAZZARRIELLO",
+                )
+
+                self.assertEqual(
+                    PatientRequestMatcher().match(
+                        [request],
+                        [scheduled_case],
+                    ),
+                    [],
+                )
+
 
 if __name__ == "__main__":
     unittest.main()

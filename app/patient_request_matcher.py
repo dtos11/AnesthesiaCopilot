@@ -70,7 +70,10 @@ class PatientRequestMatcher:
         return matches
 
     @staticmethod
-    def _surgeon_surname(surgeon: str) -> str:
+    def _surgeon_surname(surgeon: str | None) -> str | None:
+        if not isinstance(surgeon, str) or not surgeon.strip():
+            return None
+
         return surgeon.strip().split(maxsplit=1)[0].casefold()
 
     @staticmethod

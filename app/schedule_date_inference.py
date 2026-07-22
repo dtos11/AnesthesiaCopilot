@@ -18,11 +18,12 @@ SPANISH_MONTHS = {
     "diciembre": 12,
 }
 
-FILENAME_PATTERN = re.compile(
-    r"^\s*Listas?\s+del\s+(?P<day>\d{1,2})\s+de\s+"
-    r"(?P<month>[A-Za-z]+)\.xlsx\s*$",
+DATE_PATTERN = re.compile(
+    r"(?<!\d)(?P<day>\d{1,2})\s+(?:de\s+)?"
+    rf"(?P<month>{'|'.join(SPANISH_MONTHS)})\b",
     re.IGNORECASE,
 )
+XLSX_PATTERN = re.compile(r"\.xlsx\s*$", re.IGNORECASE)
 
 
 def infer_schedule_date(
@@ -30,23 +31,23 @@ def infer_schedule_date(
     today: date | None = None,
 ) -> date:
     filename = Path(workbook_path).name
-    match = FILENAME_PATTERN.fullmatch(filename)
+    extension_match = XLSX_PATTERN.search(filename)
+    matches = (
+        list(DATE_PATTERN.finditer(filename[:extension_match.start()]))
+        if extension_match is not None
+        else []
+    )
 
-    if match is None:
+    if len(matches) != 1:
         raise ValueError(
             "Cannot infer schedule date from filename "
-            f"'{filename}'. Expected 'Lista del <day> de <Spanish month>.xlsx' "
-            "or 'Listas del <day> de <Spanish month>.xlsx'."
+            f"'{filename}'. Expected one unambiguous day and "
+            "Spanish month in an .xlsx filename."
         )
 
+    match = matches[0]
     month_name = match.group("month").casefold()
-    month = SPANISH_MONTHS.get(month_name)
-
-    if month is None:
-        raise ValueError(
-            f"Cannot infer schedule date from filename '{filename}': "
-            f"unknown Spanish month '{match.group('month')}'."
-        )
+    month = SPANISH_MONTHS[month_name]
 
     day = int(match.group("day"))
     reference_date = today or date.today()
